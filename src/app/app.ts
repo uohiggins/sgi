@@ -1,12 +1,19 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, inject, Injectable } from '@angular/core';
+import { Title } from '@angular/platform-browser';
+import { RouterOutlet, RouterStateSnapshot, TitleStrategy } from '@angular/router';
 
 @Component({
-  imports: [RouterOutlet],
   selector: 'app-root',
-  styleUrl: './app.scss',
+  imports: [RouterOutlet],
   templateUrl: './app.html',
+  styleUrl: './app.scss',
 })
-export class App {
-  protected readonly title = signal('sgi');
+@Injectable()
+export class App extends TitleStrategy {
+  protected readonly title = inject(Title);
+
+  updateTitle(snapshot: RouterStateSnapshot): void {
+    const pageTitle = this.buildTitle(snapshot) || this.title.getTitle();
+    this.title.setTitle(`SGI - ${pageTitle}`);
+  }
 }

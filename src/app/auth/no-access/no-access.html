@@ -1,0 +1,49 @@
+<main class="no-access-page">
+  <section class="no-access-panel">
+    <div class="status-icon">
+      <i class="fa-solid fa-lock"></i>
+    </div>
+
+    @if (authService.currentApplication(); as application) {
+      <div>
+        <span class="eyebrow">Sesión activa</span>
+        <h1>Sin acceso a {{ application.name }}</h1>
+        <p>Tu usuario está autenticado, pero no tiene permisos para ingresar a esta aplicación.</p>
+      </div>
+    } @else {
+      <div>
+        <span class="eyebrow">Sesión activa</span>
+        <h1>La aplicación no está registrada en la intranet</h1>
+        <p>
+          Las credenciales son correctas, pero no existe una aplicación asociada al identificador
+          configurado para {{ appName }}.
+        </p>
+      </div>
+    }
+
+    @if (authService.availableApplications().length > 0) {
+      <div class="applications-list">
+        <h2>Aplicaciones disponibles</h2>
+
+        @for (application of authService.availableApplications(); track application.id) {
+          <button type="button" class="application-item" (click)="goToApplication(application)">
+            <span class="application-icon">
+              <i [class]="application.icon || 'fa-solid fa-grip'"></i>
+            </span>
+            <span>
+              <strong>{{ application.name }}</strong>
+              <small>{{ application.slug || application.url }}</small>
+            </span>
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          </button>
+        }
+      </div>
+    }
+
+    <div class="actions">
+      <button type="button" class="btn btn-outline-secondary" (click)="authService.logout()">
+        Cerrar sesión
+      </button>
+    </div>
+  </section>
+</main>

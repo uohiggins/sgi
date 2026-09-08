@@ -1,0 +1,215 @@
+@use 'uoh-shared-styles/scss/local_variables' as *;
+@use 'uoh-shared-styles/scss/fonts';
+@use 'uoh-shared-styles/scss/custom_mixins' as *;
+@use 'uoh-shared-styles/scss/global' as *;
+
+header {
+    width: 100%;
+    height: auto;
+    min-height: 100px;
+    padding: 1rem 2.5rem 0.5rem;
+    box-shadow: 0 5px 15px -10px rgba(0, 0, 0, 0.2);
+
+    #main-header {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+
+        .page_title {
+            width: 75%;
+            display: flex;
+            align-items: center;
+
+            padding-right: 2.25rem;
+
+            h2 {
+                color: var(--bs-text) !important;
+                font-weight: 700;
+                letter-spacing: -0.32px;
+
+                display: flex;
+                align-items: center;
+                line-height: 1 !important;
+
+                @include subtitle(20%, 2px, 50px, -10px, var(--bs-cuarto));
+
+                i {
+                    color: var(--bs-principal);
+                    font-size: 2rem;
+                }
+
+                span {
+                    min-width: 100%;
+                    color: var(--bs-text) !important;
+                }
+            }
+
+            .btn-void {
+                right: 20px;
+                top: 50%;
+                transform: translateY(-50%);
+                cursor: pointer;
+            }
+        }
+
+        .login {
+            width: 25%;
+            height: 100%;
+            border-left: 1px solid var(--bs-local-card-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            a.logout {
+                border: 1px solid var(--bs-principal);
+                border-radius: 1rem;
+                color: var(--bs-text);
+
+                &:hover {
+                    background-color: var(--bs-principal);
+                    color: var(--bs-text);
+                }
+            }
+
+            a:not(.logout) {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                line-height: normal;
+
+                cursor: pointer;
+
+                &:focus, &:focus-visible{
+                    background-color: transparent;
+                    border: none;
+                    outline: none;
+                }
+
+                &.profile_link {
+                    .profile-container {
+                        @include icon-circle(80px, 80px, transparent, var(--bs-quinto), 50%, 8px);
+                        padding: 0 !important;
+                        margin-right: .5rem;
+                        //overflow: hidden;
+
+                        @media (max-width: $sm) {
+                            font-size: 1.5rem;
+                            width: 60px !important;
+                            height: 60px !important;
+                        }
+
+                        img,
+                        i {
+                            @extend .img-fix;
+                            border-radius: 50%;
+                            height: 64px !important;
+                            font-size: 2rem;
+                            box-shadow: 1px 1px 10px rgba(0,0,0,0.5);
+                            //filter: brightness(1) invert(var(--bs-invert-filter));
+
+                            @media (max-width: $sm) {
+                                height: 44px !important;
+                            }
+                        }
+                    }
+                }
+
+                i {
+                    margin-right: 0.5rem;
+                    color: var(--bs-principal);
+                    width: auto;
+                    height: 16px;
+
+                    @include icon-circle(40px, 40px);
+                }
+
+                &:hover {
+                    color: var(--bs-fondo);
+                    transition: all 0.3s ease-in-out;
+                }
+
+                &:hover i {
+                    background-color: var(--bs-principal);
+                    color: var(--bs-fondo);
+                }
+            }
+
+            .profile_name {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                justify-content: center;
+
+                small {
+                    color: var(--bs-principal);
+                    font-weight: 600;
+                    font-size: 0.7rem;
+                }
+
+                span {
+                    font-size: 1rem;
+                    display: block;
+                    line-height: 1.2;
+                }
+
+                a {
+                    font-size: 0.7rem !important;
+                    padding: 0 5px !important;
+                    min-width: 105px !important;
+                }
+            }
+
+            .dropdown {
+                z-index: 9999 !important;
+            }
+        }
+    }
+
+    #alt-header {
+        @media (max-width: $md) {
+            .page_title {
+                height: 50px;
+            }
+        }
+    }
+
+    @media (max-width: $md) {
+        .page_title {
+            width: 450% !important;
+
+            padding-right: 0 !important;
+            margin-right: 0 !important;
+
+            h2 {
+                color: var(--bs-text) !important;
+                font-weight: 700;
+                letter-spacing: -0.32px;
+
+                display: flex;
+                align-items: center;
+                line-height: 1 !important;
+
+                @include subtitle(20%, 2px, 50px, -10px, var(--bs-cuarto));
+
+                i {
+                    color: var(--bs-principal);
+                    font-size: 2rem;
+                }
+            }
+
+            button {
+                padding-right: 0 !important;
+                margin-right: 0 !important;
+            }
+        }
+
+        .login {
+            width: inherit !important;
+            justify-content: end !important;
+            border-left: none !important;
+        }
+    }
+}
