@@ -11,6 +11,7 @@
   "private": true,
   "packageManager": "npm@11.17.0",
   "dependencies": {
+    "@angular/cdk": "^22.1.0",
     "@angular/common": "^22.1.0",
     "@angular/compiler": "^22.1.0",
     "@angular/core": "^22.1.0",
@@ -23,7 +24,8 @@
     "rxjs": "~7.8.0",
     "sweetalert2": "^11.26.25",
     "tslib": "^2.3.0",
-    "uoh-shared-styles": "git+https://github.com/uohiggins/uoh-shared-styles.git"
+    "uoh-shared-styles": "github:uohiggins/uoh-shared-styles",
+    "uoh-ui": "github:uohiggins/uoh-angular-ui#release"
   },
   "devDependencies": {
     "@angular/build": "^22.1.5",

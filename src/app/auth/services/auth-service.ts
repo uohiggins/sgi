@@ -193,7 +193,7 @@ export class AuthService {
     this._access.set(session.access ?? null);
     this._sessionLoaded.set(Boolean(session.user && session.access));
 
-    //this.applyApplicationTheme(session.access?.current_application);
+    this.applyApplicationTheme(session.access?.current_application);
 
     if (this.useLocalStorageToken) {
       if (session.access_token) {
@@ -208,7 +208,7 @@ export class AuthService {
     return session;
   }
 
-  private applyApplicationTheme(application: AuthApplication | null): void {
+  private applyApplicationTheme(application?: AuthApplication | null): void {
     if (!application?.color) {
       return;
     }

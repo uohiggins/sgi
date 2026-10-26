@@ -9,6 +9,8 @@ import {
 import { routes } from './app.routes';
 import { App } from './app';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
+import { provideUohUi } from 'uoh-ui';
+import { environment } from '../environments/environment';
 import { authInterceptor } from './auth/interceptors/auth-interceptor';
 
 export const appConfig: ApplicationConfig = {
@@ -17,5 +19,6 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withViewTransitions(), withComponentInputBinding()),
     { provide: TitleStrategy, useClass: App },
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
+    provideUohUi({ apiUrl: environment.API_URL }),
   ],
 };

@@ -68,6 +68,7 @@ describe('AuthService', () => {
     localStorage.clear();
     environment.AUTH_USE_LOCAL_STORAGE_TOKEN = originalUseLocalStorageToken;
     TestBed.resetTestingModule();
+    document.documentElement.style.removeProperty('--bs-principal');
   });
 
   it('stores the token and builds permission helpers in localStorage mode', () => {
@@ -184,5 +185,45 @@ describe('AuthService', () => {
     expect(service.isSuperAdmin()).toBe(true);
     expect(service.currentApplication()).toBeNull();
     expect(service.hasApplicationAccess()).toBe(false);
+  });
+
+  it('applies --bs-principal CSS variable when login or loadSession returns current_application with a valid color', () => {
+    localStorage.setItem('access_token', 'existing-token');
+    const { service, httpMock } = setup(true);
+    const accessWithColor: AuthAccess = {
+      ...makeAccess(),
+      current_application: {
+        id: 1,
+        uuid: environment.APP_ID,
+        name: environment.APP_NAME,
+        slug: 'intranet',
+        url: 'https://app.uoh.cl/intranet',
+        icon: 'fa-solid fa-house-laptop',
+        color: '#0075C9',
+        has_access: true,
+      },
+    };
+
+    service.loadSession().subscribe();
+    const meReq = httpMock.expectOne(`${environment.API_URL}/auth/me`);
+    meReq.flush({ data: makeSession(accessWithColor) });
+
+    expect(document.documentElement.style.getPropertyValue('--bs-principal')).toBe('#0075C9');
+
+    document.documentElement.style.removeProperty('--bs-principal');
+
+    service.login({ email: 'sgi.dev@uoh.test', password: 'secret' }).subscribe();
+    const loginReq = httpMock.expectOne(`${environment.API_URL}/auth/login`);
+    loginReq.flush({
+      data: makeSession({
+        ...accessWithColor,
+        current_application: {
+          ...accessWithColor.current_application!,
+          color: '#e0ce4d',
+        },
+      }),
+    });
+
+    expect(document.documentElement.style.getPropertyValue('--bs-principal')).toBe('#e0ce4d');
   });
 });
