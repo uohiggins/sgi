@@ -1,6 +1,6 @@
 export const environment = {
   API_URL: '',
-  MAPBOX_KEY: '',
+  APP_ID: '',
   APP_NAME: '',
   AUTH_USE_LOCAL_STORAGE_TOKEN: true,
   LOGIN_ROUTE: '/',

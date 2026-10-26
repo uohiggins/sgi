@@ -1,7 +1,26 @@
+// @use 'uoh-shared-styles/scss/index' with (
+//     $first: #EAB308,  // fondo menú, botones (Mostaza vibrante y moderno)
+//     $nth: #B45309,    // títulos, textos (Ámbar oscuro/cobre)
+//     $trd: #D97706,    // iconos principales (Naranja dorado intenso)
+//     $fourth: #F59E0B, // adornos, iconos secundarios (Dorado brillante)
+//     $fifth: #1C1917   // textos secundarios (Gris carbón casi negro)
+// );
+
 @use 'uoh-shared-styles/scss/index' with (
-    $first: #c90700, // fondo menú, botones
-    $nth: #51af04, // títulos, textos
-    $trd: #0bbfcc, // iconos principales
-    $fourth: #e100ff, // adornos, iconos secundarios
-    $fifth: #383bff // textos secundarios
+    $first: #e0ce4d, // fondo menú, botones
+    $nth: #564108, // títulos, textos
+    $trd: #d7be00, // iconos principales
+    $fourth: #6e5000, // adornos, iconos secundarios
+    $fifth: #463d04, // textos secundarios
 );
+
+.aside-header {
+    .logo_uoh {
+        filter: drop-shadow(0 0 10px var(--bs-cuarto));
+    }
+
+    h3{
+        text-shadow: 0 0 10px var(--bs-cuarto);
+    }
+}
+ 
