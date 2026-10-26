@@ -1,0 +1,433 @@
+<section class="mantenedor-proyectos-page">
+  <sgi-feature-page-header
+    eyebrow="SGI"
+    title="Mantenedor de proyectos"
+    description="Consulta y administración de proyectos de infraestructura institucional."
+  />
+
+  <div class="card pattern color-border mt-4">
+    <div class="p-3 p-md-4">
+      <!-- Barra superior: Búsqueda y acciones -->
+      <div class="row g-3 align-items-center mb-4">
+        <div class="col-12 col-md-6 col-lg-5">
+          <div class="input-group">
+            <span class="input-group-text bg-white border-end-0">
+              <i class="fa-solid fa-magnifying-glass text-muted"></i>
+            </span>
+            <input
+              #searchInput
+              type="search"
+              class="form-control border-start-0"
+              placeholder="Buscar por nombre o código..."
+              [value]="searchTerm()"
+              (keyup.enter)="onSearch(searchInput.value)"
+            />
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              (click)="onSearch(searchInput.value)"
+            >
+              Buscar
+            </button>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-7 text-md-end d-flex justify-content-md-end align-items-center gap-3">
+          <span class="text-muted small">
+            Total: <strong>{{ totalProjects() }}</strong> proyecto(s)
+          </span>
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm"
+            (click)="loadProjects()"
+            title="Recargar listado"
+          >
+            <i class="fa-solid fa-rotate-right me-1" [class.fa-spin]="loading()"></i>
+            Actualizar
+          </button>
+        </div>
+      </div>
+
+      <!-- Estado de carga -->
+      @if (loading()) {
+        <div class="text-center py-5">
+          <div class="spinner-border text-warning" role="status"></div>
+          <p class="text-muted mt-2 mb-0">Cargando proyectos...</p>
+        </div>
+      } @else if (error()) {
+        <!-- Estado de error -->
+        <div class="alert alert-danger d-flex align-items-center mb-0" role="alert">
+          <i class="fa-solid fa-circle-exclamation fa-lg me-3"></i>
+          <div>
+            {{ error() }}
+            <button type="button" class="btn btn-sm btn-outline-danger ms-3" (click)="loadProjects()">
+              Reintentar
+            </button>
+          </div>
+        </div>
+      } @else if (isEmpty()) {
+        <!-- Estado vacío -->
+        <div class="text-center py-5">
+          <i class="fa-solid fa-folder-open fa-3x text-muted mb-3 d-block"></i>
+          <h5 class="fw-semibold text-secondary">No se encontraron proyectos</h5>
+          <p class="text-muted small mb-0">
+            @if (searchTerm()) {
+              No hay proyectos que coincidan con la búsqueda "{{ searchTerm() }}".
+            } @else {
+              Aún no hay proyectos registrados en el sistema.
+            }
+          </p>
+        </div>
+      } @else {
+        <!-- Tabla de proyectos -->
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light text-uppercase small text-muted">
+              <tr>
+                <th scope="col" style="width: 12%;">Número</th>
+                <th scope="col" style="width: 32%;">Nombre del proyecto</th>
+                <th scope="col" style="width: 18%;">Dirección</th>
+                <th scope="col" style="width: 18%;">Solicitado por</th>
+                <th scope="col" style="width: 10%;">Estado</th>
+                <th scope="col" style="width: 10%;" class="text-end">Opciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (project of projects(); track trackByProjectId($index, project)) {
+                <tr>
+                  <!-- 1. Número -->
+                  <td>
+                    <span class="badge bg-light text-dark border font-monospace">
+                      {{ project.internal_code || ('#' + project.id) }}
+                    </span>
+                    @if (project.is_default) {
+                      <span class="badge bg-info-subtle text-info border border-info ms-1" title="Plantilla base">
+                        Plantilla
+                      </span>
+                    }
+                  </td>
+
+                  <!-- 2. Nombre del proyecto -->
+                  <td>
+                    <div class="fw-semibold text-dark">{{ project.name }}</div>
+                    @if (project.description) {
+                      <small class="text-muted d-block text-truncate" style="max-width: 340px;">
+                        {{ project.description }}
+                      </small>
+                    }
+                  </td>
+
+                  <!-- 3. Dirección -->
+                  <td>
+                    <span class="small">{{ project.department || '—' }}</span>
+                  </td>
+
+                  <!-- 4. Solicitado por -->
+                  <td>
+                    <span class="small">{{ project.requesting_unit || '—' }}</span>
+                  </td>
+
+                  <!-- 5. Estado (pill coloreado) -->
+                  <td>
+                    <span
+                      class="badge rounded-pill text-nowrap px-2 py-1"
+                      [style.background-color]="project.status_color || '#6c757d'"
+                      [style.color]="getTextColor(project.status_color)"
+                    >
+                      {{ project.status || 'Sin estado' }}
+                    </span>
+                  </td>
+
+                  <!-- 6. Opciones (4 acciones según backend) -->
+                  <td class="text-end">
+                    <div class="btn-group btn-group-sm" role="group">
+                      <!-- Ver detalle -->
+                      <button
+                        type="button"
+                        class="btn btn-outline-secondary"
+                        (click)="onViewDetail(project)"
+                        title="Ver detalle del proyecto"
+                      >
+                        <i class="fa-solid fa-eye"></i>
+                      </button>
+
+                      <!-- Ver historial -->
+                      <button
+                        type="button"
+                        class="btn btn-outline-secondary"
+                        (click)="openHistoryModal(project)"
+                        title="Ver historial de transiciones"
+                      >
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                      </button>
+
+                      <!-- Ver repositorio de carpetas (Documentos) -->
+                      <button
+                        type="button"
+                        class="btn btn-outline-secondary"
+                        (click)="openDocumentsModal(project)"
+                        title="Ver repositorio de documentos"
+                      >
+                        <i class="fa-solid fa-folder-open"></i>
+                      </button>
+
+                      <!-- Avanzar paso (solo si actions.can_advance es true) -->
+                      @if (project.actions?.['can_advance']) {
+                        <button
+                          type="button"
+                          class="btn btn-outline-success"
+                          (click)="onAdvanceStep(project)"
+                          title="Avanzar paso de flujo"
+                        >
+                          <i class="fa-solid fa-forward-step"></i>
+                        </button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Paginación real conectada al backend -->
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mt-4 pt-3 border-top gap-3">
+          <div class="d-flex align-items-center gap-2">
+            <span class="text-muted small">Filas por página:</span>
+            <select
+              #perPageSelect
+              class="form-select form-select-sm"
+              style="width: 75px;"
+              [value]="perPage()"
+              (change)="changePerPage(+perPageSelect.value)"
+            >
+              <option [value]="5">5</option>
+              <option [value]="10">10</option>
+              <option [value]="15">15</option>
+              <option [value]="25">25</option>
+              <option [value]="50">50</option>
+            </select>
+            <span class="text-muted small ms-2">
+              Página {{ pagination().current_page }} de {{ pagination().last_page }}
+            </span>
+          </div>
+
+          <nav aria-label="Paginación de proyectos">
+            <ul class="pagination pagination-sm mb-0">
+              <li class="page-item" [class.disabled]="currentPage() <= 1">
+                <button
+                  type="button"
+                  class="page-link"
+                  (click)="goToPage(currentPage() - 1)"
+                  [disabled]="currentPage() <= 1"
+                  aria-label="Anterior"
+                >
+                  <i class="fa-solid fa-chevron-left"></i>
+                </button>
+              </li>
+
+              <li class="page-item active" aria-current="page">
+                <span class="page-link">{{ currentPage() }}</span>
+              </li>
+
+              <li class="page-item" [class.disabled]="currentPage() >= pagination().last_page">
+                <button
+                  type="button"
+                  class="page-link"
+                  (click)="goToPage(currentPage() + 1)"
+                  [disabled]="currentPage() >= pagination().last_page"
+                  aria-label="Siguiente"
+                >
+                  <i class="fa-solid fa-chevron-right"></i>
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Modal 1: Historial de Transiciones -->
+  @if (activeModal() === 'history') {
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header border-bottom">
+            <h5 class="modal-title">
+              <i class="fa-solid fa-clock-rotate-left me-2 text-primary"></i>
+              Historial de transiciones — {{ selectedProject()?.name }}
+            </h5>
+            <button type="button" class="btn-close" (click)="closeModal()" aria-label="Close"></button>
+          </div>
+          <div class="modal-body p-4">
+            @if (modalLoading()) {
+              <div class="text-center py-4">
+                <div class="spinner-border text-warning" role="status"></div>
+                <p class="text-muted mt-2 mb-0">Cargando historial...</p>
+              </div>
+            } @else if (modalError()) {
+              <div class="alert alert-danger mb-0">{{ modalError() }}</div>
+            } @else if (historyItems().length === 0) {
+              <div class="text-center text-muted py-4">
+                <i class="fa-solid fa-clock-rotate-left fa-2x mb-2 d-block"></i>
+                No se registran transiciones para este proyecto.
+              </div>
+            } @else {
+              <div class="timeline">
+                @for (item of historyItems(); track item.id) {
+                  <div class="timeline-card p-3 mb-3 border rounded bg-light">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <span class="badge bg-primary text-uppercase font-monospace small">
+                        {{ item.action }}
+                      </span>
+                      <small class="text-muted">
+                        {{ item.created_at ? (item.created_at | date:'dd/MM/yyyy HH:mm') : '—' }}
+                      </small>
+                    </div>
+
+                    <div class="small text-muted mb-2">
+                      <i class="fa-solid fa-user me-1"></i>
+                      <strong>{{ item.user_name || ('Usuario #' + item.user_id) }}</strong>
+                    </div>
+
+                    @if (item.from_phase_name || item.to_phase_name) {
+                      <div class="small text-secondary mb-2">
+                        <span class="badge bg-secondary-subtle text-secondary border">{{ item.from_phase_name || 'Inicio' }}</span>
+                        <i class="fa-solid fa-arrow-right mx-2 text-muted"></i>
+                        <span class="badge bg-secondary-subtle text-secondary border">{{ item.to_phase_name || 'Fin' }}</span>
+                      </div>
+                    } @else if (item.phase_name) {
+                      <div class="small text-secondary mb-2">
+                        Fase asociada: <span class="badge bg-secondary-subtle text-secondary border">{{ item.phase_name }}</span>
+                      </div>
+                    }
+
+                    @if (item.comment) {
+                      <div class="small bg-white p-2 rounded border border-light-subtle fst-italic text-dark">
+                        "{{ item.comment }}"
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+          <div class="modal-footer border-top">
+            <button type="button" class="btn btn-secondary" (click)="closeModal()">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Modal 2: Repositorio de Documentos por Fase -->
+  @if (activeModal() === 'documents') {
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header border-bottom">
+            <h5 class="modal-title">
+              <i class="fa-solid fa-folder-open me-2 text-warning"></i>
+              Documentos por fase — {{ selectedProject()?.name }}
+            </h5>
+            <button type="button" class="btn-close" (click)="closeModal()" aria-label="Close"></button>
+          </div>
+          <div class="modal-body p-4">
+            @if (modalLoading()) {
+              <div class="text-center py-4">
+                <div class="spinner-border text-warning" role="status"></div>
+                <p class="text-muted mt-2 mb-0">Cargando repositorio de documentos...</p>
+              </div>
+            } @else if (modalError()) {
+              <div class="alert alert-danger mb-0">{{ modalError() }}</div>
+            } @else if (documentGroups().length === 0) {
+              <div class="text-center text-muted py-4">
+                <i class="fa-solid fa-folder-open fa-2x mb-2 d-block"></i>
+                No hay fases ni documentos asociados a este proyecto.
+              </div>
+            } @else {
+              <div class="d-flex flex-column gap-3">
+                @for (group of documentGroups(); track group.phase_id) {
+                  <div class="card border shadow-sm">
+                    <div class="card-header bg-light d-flex flex-wrap justify-content-between align-items-center gap-2">
+                      <div>
+                        <span class="badge bg-primary me-2">{{ group.stage_name || 'Etapa' }}</span>
+                        <strong>{{ group.phase_name }}</strong>
+                      </div>
+                      <div class="d-flex align-items-center gap-2">
+                        @if (group.closed_at) {
+                          <span class="badge bg-success-subtle text-success border border-success">
+                            Cerrada: {{ group.closed_at | date:'dd/MM/yyyy' }}
+                          </span>
+                        } @else {
+                          <span class="badge bg-warning-subtle text-warning border border-warning">
+                            Fase abierta
+                          </span>
+                        }
+                        <span class="badge bg-secondary">{{ group.files.length }} archivo(s)</span>
+                      </div>
+                    </div>
+                    <div class="card-body p-3">
+                      @if (group.files.length === 0) {
+                        <p class="text-muted small mb-0 fst-italic">Sin documentos subidos en esta fase.</p>
+                      } @else {
+                        <div class="table-responsive">
+                          <table class="table table-sm table-hover align-middle mb-0">
+                            <thead class="table-light small text-muted">
+                              <tr>
+                                <th>Archivo</th>
+                                <th>Asociado a</th>
+                                <th>Subido por</th>
+                                <th>Fecha</th>
+                                <th>Tamaño</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              @for (file of group.files; track file.id) {
+                                <tr>
+                                  <td>
+                                    <i class="fa-solid fa-file-lines me-2 text-primary"></i>
+                                    <strong>{{ file.name }}</strong>
+                                    @if (file.was_uploaded_after_close) {
+                                      <span class="badge bg-info-subtle text-info ms-2" title="Subido después del cierre de fase">
+                                        Post-cierre
+                                      </span>
+                                    }
+                                  </td>
+                                  <td>
+                                    @if (file.requirement_name) {
+                                      <span class="badge bg-light text-dark border">
+                                        Requisito: {{ file.requirement_name }}
+                                      </span>
+                                    } @else if (file.milestone_name) {
+                                      <span class="badge bg-light text-dark border">
+                                        Hito: {{ file.milestone_name }}
+                                      </span>
+                                    } @else {
+                                      <span class="text-muted">—</span>
+                                    }
+                                  </td>
+                                  <td><small class="text-muted">{{ file.uploaded_by || '—' }}</small></td>
+                                  <td><small class="text-muted">{{ file.created_at ? (file.created_at | date:'dd/MM/yyyy') : '—' }}</small></td>
+                                  <td><small class="text-muted font-monospace">{{ formatFileSize(file.file_size) }}</small></td>
+                                </tr>
+                              }
+                            </tbody>
+                          </table>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+          <div class="modal-footer border-top">
+            <button type="button" class="btn btn-secondary" (click)="closeModal()">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</section>
