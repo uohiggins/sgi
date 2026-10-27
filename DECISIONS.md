@@ -7,6 +7,11 @@ Este archivo registra las decisiones de arquitectura, estructura de datos, conve
 **Decisión:** Eliminar el componente y su carpeta de `src/app/sgi/ui/feature-page-header/`, además de retirar sus etiquetas e imports en Home y Mantenedor de proyectos.
 **Alternativas descartadas:** Mantener un componente sin contenido ni responsabilidad propia.
 
+## 2026-10-27 — Gobernanza de `uoh-ui` y convención de layout de páginas
+**Contexto:** Mantener soluciones de UI locales cuando la librería oficial ya resuelve la necesidad duplica componentes y configuración entre el proyecto consumidor y `uoh-angular-ui`/`uoh-shared-styles`. Este frontend también podría servir de base para futuros proyectos, por lo que conviene consolidar las capacidades en las librerías oficiales. Además, mostrar el título tanto en `UohHeader` como en el cuerpo de una página produce títulos duplicados.
+**Decisión:** Antes de crear o modificar UI, verificar los componentes, variantes y configuración de `uoh-ui`, y consultar su README y wiki. Si la librería no ofrece la capacidad, implementarla directamente en `uoh-angular-ui` o `uoh-shared-styles`; solo se permite un workaround local como excepción temporal explícitamente documentada en `DECISIONS.md` con su razón. Las páginas SGI delegan su título de ruta activa a `UohHeader`, sin título, eyebrow ni descripción duplicados en el cuerpo, y envuelven el contenido con el patrón `.card.pattern.color-border.mt-4` y `.p-3.p-md-4`.
+**Alternativas descartadas:** Crear componentes o estilos locales como sustitutos permanentes de capacidades ausentes en las librerías oficiales, o repetir el título de página en su contenido.
+
 ## 2026-08-21 — Adopción de Angular 22 standalone y Vitest
 **Contexto:** Inicio del desarrollo del frontend de la intranet SGI para la Universidad de O'Higgins con necesidad de modernización técnica.
 **Decisión:** Utilizar Angular 22 con componentes 100% standalone (sin `NgModule`), `ChangeDetectionStrategy.OnPush`, inyección de dependencias moderna mediante `inject()`, reactividad con Angular Signals (`signal`, `computed`), y Vitest + jsdom como runner de pruebas unitarias.

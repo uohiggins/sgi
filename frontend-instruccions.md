@@ -41,6 +41,27 @@ Arbol base vigente:
 - `src/app/sgi/features/mantenedor-proyectos/models/project.interface.ts`: contratos e interfaces del feature y del dominio.
 - `src/app/sgi/interfaces` y `src/app/sgi/services`: carpetas heredadas del arranque inicial; tratarlas como transitorias hasta migrarlas por feature.
 
+## Uso de la librería uoh-ui y convenciones de página
+
+### Uso de `uoh-ui`
+
+Prioridad obligatoria: antes de construir cualquier elemento de UI nuevo o modificar uno existente, verificar si `uoh-ui` ya lo resuelve, ya sea mediante un componente o la configuración/variante de uno existente. Si `uoh-ui` no lo tiene, la vía correcta es agregarlo directamente a la librería; existe autorización del diseñador para modificar `uoh-angular-ui` y `uoh-shared-styles`. No construir un workaround local salvo que se documente explícitamente como excepción temporal en `DECISIONS.md`, indicando la razón.
+
+Además del README, la librería cuenta con una wiki en `github.com/uohiggins/uoh-angular-ui.wiki.git`, un repositorio Git separado que se puede clonar aparte. Consultarla antes de asumir que una capacidad no existe en la librería.
+
+### Convenciones de página
+
+- **Título de página:** `UohHeader` lo resuelve automáticamente según el título de la ruta activa. No declarar título, eyebrow ni descripción dentro del cuerpo de la página.
+- **Cuerpo de página:** envolver el contenido en el siguiente patrón:
+
+  ```html
+  <div class="card pattern color-border mt-4">
+    <div class="p-3 p-md-4">
+      ...contenido...
+    </div>
+  </div>
+  ```
+
 
 ## Configuracion y comandos
 
