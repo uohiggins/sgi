@@ -36,7 +36,6 @@ Dentro de `src/app/sgi` se debe trabajar con esta separacion:
 Arbol base vigente:
 
 - `src/app/sgi/core/services/sgi-api.service.ts`: servicio base de prueba para consumir Laravel desde SGI.
-- `src/app/sgi/ui/feature-page-header`: encabezado reutilizable interno del dominio.
 - `src/app/sgi/features/home/pages/home-page`: pagina de entrada del dominio SGI.
 - `src/app/sgi/features/mantenedor-proyectos/pages/mantenedor-proyectos-page`: sandbox inicial del mantenedor de proyectos usando `signal()` y `computed()`.
 - `src/app/sgi/features/mantenedor-proyectos/models/project.interface.ts`: contratos e interfaces del feature y del dominio.

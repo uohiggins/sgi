@@ -2,12 +2,11 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { UohUserOption, UohUserSelect, UohUserSelectValue } from 'uoh-ui';
-import { FeaturePageHeader } from '../../../../ui/feature-page-header/feature-page-header';
 
 @Component({
   selector: 'sgi-home-page',
   standalone: true,
-  imports: [RouterLink, FormsModule, FeaturePageHeader, UohUserSelect],
+  imports: [RouterLink, FormsModule, UohUserSelect],
   templateUrl: './home-page.html',
   styleUrl: './home-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

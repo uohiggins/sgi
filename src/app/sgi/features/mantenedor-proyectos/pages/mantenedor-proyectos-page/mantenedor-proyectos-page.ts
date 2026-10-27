@@ -1,7 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import Swal from 'sweetalert2/dist/sweetalert2.esm.all.js';
-import { FeaturePageHeader } from '../../../../ui/feature-page-header/feature-page-header';
 import { SgiApiService } from '../../../../core/services/sgi-api.service';
 import {
   ProjectHistoryItem,
@@ -13,7 +12,7 @@ import {
 @Component({
   selector: 'sgi-mantenedor-proyectos-page',
   standalone: true,
-  imports: [FeaturePageHeader, DatePipe],
+  imports: [DatePipe],
   templateUrl: './mantenedor-proyectos-page.html',
   styleUrl: './mantenedor-proyectos-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -2,6 +2,11 @@
 
 Este archivo registra las decisiones de arquitectura, estructura de datos, convenciones y alcance tomadas en el proyecto frontend de SGI.
 
+## 2026-10-27 — Eliminación de FeaturePageHeader
+**Contexto:** `FeaturePageHeader` quedó sin contenido tras adoptar `UohHeader` de `uoh-ui` para mostrar el título de página, por lo que conservarlo como componente SGI independiente era redundante.
+**Decisión:** Eliminar el componente y su carpeta de `src/app/sgi/ui/feature-page-header/`, además de retirar sus etiquetas e imports en Home y Mantenedor de proyectos.
+**Alternativas descartadas:** Mantener un componente sin contenido ni responsabilidad propia.
+
 ## 2026-08-21 — Adopción de Angular 22 standalone y Vitest
 **Contexto:** Inicio del desarrollo del frontend de la intranet SGI para la Universidad de O'Higgins con necesidad de modernización técnica.
 **Decisión:** Utilizar Angular 22 con componentes 100% standalone (sin `NgModule`), `ChangeDetectionStrategy.OnPush`, inyección de dependencias moderna mediante `inject()`, reactividad con Angular Signals (`signal`, `computed`), y Vitest + jsdom como runner de pruebas unitarias.
