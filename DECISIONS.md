@@ -2,6 +2,11 @@
 
 Este archivo registra las decisiones de arquitectura, estructura de datos, convenciones y alcance tomadas en el proyecto frontend de SGI.
 
+## 2026-10-29 — Mecanismo de traspaso entre agentes (AGENTS.md + HANDOFF.md)
+**Contexto:** El repositorio es trabajado por distintos agentes de IA en sesiones separadas y con límites de cuota, lo que arriesga perder el contexto de una tarea a medias o dejar el árbol sucio.
+**Decisión:** Agregar `HANDOFF.md` en la raíz (estado actual en una pantalla: tarea en curso, hecho, siguiente paso exacto y cuidados; se sobrescribe) y la sección "Protocolo de trabajo entre agentes" en `AGENTS.md`: leer `AGENTS.md`, `DECISIONS.md` y `HANDOFF.md` al empezar; un agente por rama a la vez; commits de checkpoint tras cada sub-paso verificado; al terminar o cerca del límite, actualizar `HANDOFF.md`, comitear y dejar el árbol limpio; desconfiar de un `HANDOFF.md` antiguo o que contradiga `git log`. `.github/copilot-instructions.md` solo apunta a esos archivos para no duplicar contenido.
+**Alternativas descartadas:** Historial de traspasos acumulativo (crece sin control y queda obsoleto) o depender únicamente del historial de chat de cada agente.
+
 ## 2026-10-29 — Retiro del widget de prueba de uoh-user-select de Inicio
 **Contexto:** La página de Inicio incluía un `<uoh-user-select>` de sandbox creado para validar la integración de `uoh-ui` (compilada contra Angular 21 / ng-select 21) con Angular 22 y ng-select 24.0.2. Con la integración validada, el widget ya no aporta valor al usuario final.
 **Decisión:** Retirar el widget, sus signals y datos de ejemplo de `HomePage`. La verificación de compatibilidad se conserva en `src/app/uoh-ui-compat.spec.ts`, con un componente anfitrión definido dentro del propio spec (renderizado, apertura del dropdown en el overlay de CDK y selección de opción). Se mantienen `provideUohUi()`, `vitest-base.config.ts` y `@angular/cdk`, usados por otros componentes de `uoh-ui` (header, sidebar). El spec puede retirarse cuando `uoh-ui` se recompile contra Angular 22 / ng-select 24.
