@@ -7,19 +7,6 @@
           <p>Sandbox inicial para validar componentes standalone y estado con signals.</p>
         </a>
       </div>
-
-      <div class="card mt-4 p-3">
-        <label for="sandbox-user-select" class="form-label fw-semibold">
-          Prueba de integración <code>&lt;uoh-user-select&gt;</code> (uoh-ui + ng-select 24.0.2)
-        </label>
-        <uoh-user-select
-          labelForId="sandbox-user-select"
-          placeholder="Seleccione persona de prueba"
-          [users]="sampleUsers()"
-          [ngModel]="selectedUserId()"
-          (ngModelChange)="selectedUserId.set($event)"
-        />
-      </div>
     </div>
   </div>
 </section>

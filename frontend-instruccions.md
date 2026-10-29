@@ -84,7 +84,7 @@ Verificacion ejecutada:
 
 - `npm run build`: pasa.
 - Advertencias de build: budget inicial supera 500 kB, `sweetalert2`, Bootstrap y `bootstrap/js/dist/modal` aparecen como CommonJS/AMD optimization bailouts, Sass advierte de funciones globales/deprecadas (`darken`).
-- `npm test -- --watch=false`: pasa (13 archivos de test, 75 tests, Vitest).
+- `npm test -- --watch=false`: pasa (14 archivos de test, 77 tests, Vitest).
 
 
 ## Autenticacion

@@ -2,6 +2,11 @@
 
 Este archivo registra las decisiones de arquitectura, estructura de datos, convenciones y alcance tomadas en el proyecto frontend de SGI.
 
+## 2026-10-29 — Retiro del widget de prueba de uoh-user-select de Inicio
+**Contexto:** La página de Inicio incluía un `<uoh-user-select>` de sandbox creado para validar la integración de `uoh-ui` (compilada contra Angular 21 / ng-select 21) con Angular 22 y ng-select 24.0.2. Con la integración validada, el widget ya no aporta valor al usuario final.
+**Decisión:** Retirar el widget, sus signals y datos de ejemplo de `HomePage`. La verificación de compatibilidad se conserva en `src/app/uoh-ui-compat.spec.ts`, con un componente anfitrión definido dentro del propio spec (renderizado, apertura del dropdown en el overlay de CDK y selección de opción). Se mantienen `provideUohUi()`, `vitest-base.config.ts` y `@angular/cdk`, usados por otros componentes de `uoh-ui` (header, sidebar). El spec puede retirarse cuando `uoh-ui` se recompile contra Angular 22 / ng-select 24.
+**Alternativas descartadas:** Mantener el widget en Inicio solo para sostener los tests, o eliminar las pruebas de compatibilidad junto con el widget.
+
 ## 2026-10-27 — Eliminación de FeaturePageHeader
 **Contexto:** `FeaturePageHeader` quedó sin contenido tras adoptar `UohHeader` de `uoh-ui` para mostrar el título de página, por lo que conservarlo como componente SGI independiente era redundante.
 **Decisión:** Eliminar el componente y su carpeta de `src/app/sgi/ui/feature-page-header/`, además de retirar sus etiquetas e imports en Home y Mantenedor de proyectos.
