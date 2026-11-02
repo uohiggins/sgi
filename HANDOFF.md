@@ -1,16 +1,17 @@
 # HANDOFF — estado actual
-Actualizado: 2026-10-29 por Copilot · Rama: feature/sgi-frontend-motor · Último commit: 5a8d43a (previo a la creación de este archivo)
-
-Estado: **sin tarea en curso**.
+Actualizado: 2026-11-02 por Antigravity · Rama: feature/sgi-modals-uohmodal · Último commit: 95c0d0c
 
 ## Tarea en curso
-Ninguna.
+Migrar los dos modales de `mantenedor-proyectos-page` (Historial de transiciones y Repositorio de documentos) al componente oficial `<uoh-modal>` de `uoh-ui`.
 
 ## Hecho
-Nada pendiente de traspaso.
+- Creada la rama `feature/sgi-modals-uohmodal` desde `feature/sgi-frontend-motor` (`95c0d0c`).
+- Corregida la regla en `AGENTS.md` a "un agente por repo a la vez".
 
 ## Siguiente paso exacto
-Sin definir. Esperar instrucciones del usuario.
+1. Diagnosticar con DevTools por qué el modal de "Repositorio de documentos" aparece por debajo del sidebar (`uoh-sidebar`), comparando `z-index` e identificando el ancestro que crea el contexto de apilamiento.
+2. Revisar la API real de `UohModal` en `node_modules/uoh-ui`.
 
 ## Cuidado con
-Nada en particular.
+- No aplicar workarounds locales si a `UohModal` le falta alguna capacidad necesaria (tamaño `xl`, scroll interno, centrado): detenerse y avisar al usuario.
+- Sincronizar el cierre nativo de Bootstrap (ESC / backdrop) con el signal `activeModal()`.

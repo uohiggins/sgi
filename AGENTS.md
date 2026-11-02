@@ -3,7 +3,7 @@ Las instrucciones de este proyecto están en frontend-instruccions.md y DECISION
 ## Protocolo de trabajo entre agentes
 
 - **Al empezar:** leer `AGENTS.md`, `DECISIONS.md` y `HANDOFF.md`; correr `git status` y `git log --oneline -10`.
-- **Un agente por rama a la vez.**
+- **Un agente por repo a la vez (los agentes comparten la carpeta de trabajo, así que un cambio de rama afecta a todos).**
 - **Checkpoints:** hacer un commit (puede ser `wip: ...`) después de cada sub-paso verificado. Nunca terminar con el árbol sucio.
 - **Al terminar, o si se acerca el límite de cuota:** actualizar `HANDOFF.md` (se sobrescribe, máximo una pantalla), comitear y dejar `git status` limpio.
 - **Desconfiar de `HANDOFF.md`** si su fecha es vieja o contradice `git log`: preguntar al usuario antes de continuar.
