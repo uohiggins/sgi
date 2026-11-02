@@ -1,17 +1,18 @@
 # HANDOFF — estado actual
-Actualizado: 2026-11-02 por Antigravity · Rama: feature/sgi-modals-uohmodal · Último commit: 95c0d0c
+Actualizado: 2026-11-02 por Antigravity · Rama: feature/sgi-modals-uohmodal · Último commit: f67c80f
 
 ## Tarea en curso
 Migrar los dos modales de `mantenedor-proyectos-page` (Historial de transiciones y Repositorio de documentos) al componente oficial `<uoh-modal>` de `uoh-ui`.
 
 ## Hecho
-- Creada la rama `feature/sgi-modals-uohmodal` desde `feature/sgi-frontend-motor` (`95c0d0c`).
-- Corregida la regla en `AGENTS.md` a "un agente por repo a la vez".
+- **Diagnóstico DevTools (Paso 1):**
+  - `.modal` tiene `position: fixed; z-index: 1055`, mientras `.sidebar-desktop.sticky-top` (en `uoh-sidebar`) tiene `position: sticky; z-index: 1020`.
+  - Causa: ambos cuelgan de `<main>` (`position: relative; z-index: 1`), pero `.modal` está dentro de `<article class="container-fluid p-4">` que tiene `position: relative; z-index: 1` (de `uoh-shared-styles`), creando un contexto de apilamiento hijo con `z-index: 1`. Por eso el `z-index: 1055` del modal queda atrapado dentro de `article` (`1 < 1020`) y se pinta por debajo de `.sidebar-desktop` (`z-index: 1020`).
+  - `UohModal` lo resuelve moviendo su host a `document.body` en `ngAfterViewInit()` y aplicando `.uoh-modal { z-index: 11000 !important }`.
+- **Revisión API `UohModal` (Paso 2):** soporta nativamente `modalId` (requerido), `ariaLabelledBy`, `size` (`'sm' | 'lg' | 'xl' | null`), `centered` (`true` por defecto), `scrollable` (`true` por defecto), `shown`, `hidden`, `open()`, `close()`, proyectando `<ng-content />` dentro de `.modal-content`.
 
 ## Siguiente paso exacto
-1. Diagnosticar con DevTools por qué el modal de "Repositorio de documentos" aparece por debajo del sidebar (`uoh-sidebar`), comparando `z-index` e identificando el ancestro que crea el contexto de apilamiento.
-2. Revisar la API real de `UohModal` en `node_modules/uoh-ui`.
+Migrar los dos modales en `mantenedor-proyectos-page` a `<uoh-modal>`, sincronizando `(hidden)` con `closeModal()` / `activeModal()`, y verificar apertura/cierre por botones, ESC y clic en backdrop.
 
 ## Cuidado con
-- No aplicar workarounds locales si a `UohModal` le falta alguna capacidad necesaria (tamaño `xl`, scroll interno, centrado): detenerse y avisar al usuario.
-- Sincronizar el cierre nativo de Bootstrap (ESC / backdrop) con el signal `activeModal()`.
+- `<uoh-modal>` debe permanecer montado en el DOM (no dentro de `@if (activeModal() === ...)` que lo destruya antes de la animación de Bootstrap) o abrirse/cerrarse mediante `viewChild(UohModal)` (`open()` / `close()`) y limpiar el estado en `(hidden)`.
