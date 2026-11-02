@@ -1,18 +1,16 @@
 # HANDOFF — estado actual
-Actualizado: 2026-11-02 por Antigravity · Rama: feature/sgi-modals-uohmodal · Último commit: f67c80f
+Actualizado: 2026-11-02 por Antigravity · Rama: feature/sgi-modals-uohmodal · Último commit: 17d6118
 
 ## Tarea en curso
-Migrar los dos modales de `mantenedor-proyectos-page` (Historial de transiciones y Repositorio de documentos) al componente oficial `<uoh-modal>` de `uoh-ui`.
+Migrar los dos modales de `mantenedor-proyectos-page` (Historial de transiciones y Repositorio de documentos) a `<uoh-modal>` de `uoh-ui`. **Detenido por regla de gobernanza (Paso 4)** al detectar un bug en `UohModal.ngOnDestroy()` cuando coexisten dos `<uoh-modal>` hermanos.
 
 ## Hecho
-- **Diagnóstico DevTools (Paso 1):**
-  - `.modal` tiene `position: fixed; z-index: 1055`, mientras `.sidebar-desktop.sticky-top` (en `uoh-sidebar`) tiene `position: sticky; z-index: 1020`.
-  - Causa: ambos cuelgan de `<main>` (`position: relative; z-index: 1`), pero `.modal` está dentro de `<article class="container-fluid p-4">` que tiene `position: relative; z-index: 1` (de `uoh-shared-styles`), creando un contexto de apilamiento hijo con `z-index: 1`. Por eso el `z-index: 1055` del modal queda atrapado dentro de `article` (`1 < 1020`) y se pinta por debajo de `.sidebar-desktop` (`z-index: 1020`).
-  - `UohModal` lo resuelve moviendo su host a `document.body` en `ngAfterViewInit()` y aplicando `.uoh-modal { z-index: 11000 !important }`.
-- **Revisión API `UohModal` (Paso 2):** soporta nativamente `modalId` (requerido), `ariaLabelledBy`, `size` (`'sm' | 'lg' | 'xl' | null`), `centered` (`true` por defecto), `scrollable` (`true` por defecto), `shown`, `hidden`, `open()`, `close()`, proyectando `<ng-content />` dentro de `.modal-content`.
+- **Diagnóstico DevTools (Paso 1):** `.modal` (`position: fixed; z-index: 1055`) estaba dentro de `<article class="container-fluid p-4">` (`position: relative; z-index: 1` de `uoh-shared-styles`), quedando atrapado en ese stacking context hijo (`z-index: 1`) por debajo de `.sidebar-desktop.sticky-top` (`position: sticky; z-index: 1020` en `<main>`).
+- **Migración y prueba en navegador (Pasos 2 y 3):** migrados ambos modales a `<uoh-modal>` en `mantenedor-proyectos-page` y verificado en navegador (apertura, cierre por botones/ESC/backdrop, reapertura en múltiples ciclos y z-index `11000` en `document.body` sobre el sidebar).
+- **Hallazgo de gobernanza en `UohModal` (Pasos 4 y 5):** al destruir el componente (`ngOnDestroy`), `UohModal` ejecuta `this.originalParent.insertBefore(hostElement, this.originalNextSibling ?? null)`. Con dos `<uoh-modal>` hermanos, `originalNextSibling` del primero es el segundo `<uoh-modal>` (que sigue en `document.body`), lanzando `DOMException: NotFoundError`.
 
 ## Siguiente paso exacto
-Migrar los dos modales en `mantenedor-proyectos-page` a `<uoh-modal>`, sincronizando `(hidden)` con `closeModal()` / `activeModal()`, y verificar apertura/cierre por botones, ESC y clic en backdrop.
+Esperar decisión del usuario sobre corregir `UohModal.ngOnDestroy()` en `uoh-angular-ui` (ej. verificando `this.originalNextSibling?.parentNode === this.originalParent` o usando un comentario ancla/removido directo) antes de finalizar `npm test`, `DECISIONS.md` y `git push`.
 
 ## Cuidado con
-- `<uoh-modal>` debe permanecer montado en el DOM (no dentro de `@if (activeModal() === ...)` que lo destruya antes de la animación de Bootstrap) o abrirse/cerrarse mediante `viewChild(UohModal)` (`open()` / `close()`) y limpiar el estado en `(hidden)`.
+- No agregar wrappers DOM locales (`<div>` alrededor de cada `<uoh-modal>`) sin autorización, por la regla de gobernanza de `uoh-ui`.

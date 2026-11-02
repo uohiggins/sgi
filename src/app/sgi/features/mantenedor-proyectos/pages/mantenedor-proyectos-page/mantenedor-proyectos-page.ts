@@ -1,6 +1,15 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal,
+  viewChild,
+} from '@angular/core';
 import Swal from 'sweetalert2/dist/sweetalert2.esm.all.js';
+import { UohModal } from 'uoh-ui';
 import { SgiApiService } from '../../../../core/services/sgi-api.service';
 import {
   ProjectHistoryItem,
@@ -12,13 +21,16 @@ import {
 @Component({
   selector: 'sgi-mantenedor-proyectos-page',
   standalone: true,
-  imports: [DatePipe],
+  imports: [DatePipe, UohModal],
   templateUrl: './mantenedor-proyectos-page.html',
   styleUrl: './mantenedor-proyectos-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MantenedorProyectosPage implements OnInit {
   private readonly sgiApiService = inject(SgiApiService);
+
+  readonly historyModal = viewChild<UohModal>('historyModal');
+  readonly documentsModal = viewChild<UohModal>('documentsModal');
 
   // Estados reactivos principales
   readonly projects = signal<ProjectListItem[]>([]);
@@ -124,6 +136,7 @@ export class MantenedorProyectosPage implements OnInit {
     this.modalLoading.set(true);
     this.modalError.set(null);
     this.historyItems.set([]);
+    this.historyModal()?.open();
 
     this.sgiApiService.getProjectHistory(project.id).subscribe({
       next: (response) => {
@@ -144,6 +157,7 @@ export class MantenedorProyectosPage implements OnInit {
     this.modalLoading.set(true);
     this.modalError.set(null);
     this.documentGroups.set([]);
+    this.documentsModal()?.open();
 
     this.sgiApiService.getProjectDocuments(project.id).subscribe({
       next: (response) => {
@@ -159,11 +173,24 @@ export class MantenedorProyectosPage implements OnInit {
   }
 
   closeModal(): void {
+    const current = this.activeModal();
     this.activeModal.set(null);
     this.selectedProject.set(null);
     this.historyItems.set([]);
     this.documentGroups.set([]);
     this.modalError.set(null);
+
+    if (current === 'history') {
+      this.historyModal()?.close();
+    } else if (current === 'documents') {
+      this.documentsModal()?.close();
+    }
+  }
+
+  onModalHidden(modal: 'history' | 'documents'): void {
+    if (this.activeModal() === modal) {
+      this.closeModal();
+    }
   }
 
   getTextColor(hex?: string | null): string {

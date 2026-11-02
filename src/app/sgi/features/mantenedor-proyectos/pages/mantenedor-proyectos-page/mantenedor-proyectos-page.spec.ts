@@ -102,31 +102,56 @@ describe('MantenedorProyectosPage', () => {
     });
   });
 
-  it('openHistoryModal debe abrir el modal y llamar a getProjectHistory', () => {
+  it('openHistoryModal debe abrir UohModal de historial y llamar a getProjectHistory', () => {
     const project = mockProjects[0];
+    const openSpy = vi.spyOn(component.historyModal()!, 'open');
+
     component.openHistoryModal(project);
 
+    expect(openSpy).toHaveBeenCalled();
     expect(component.activeModal()).toBe('history');
     expect(component.selectedProject()).toBe(project);
     expect(sgiApiServiceSpy.getProjectHistory).toHaveBeenCalledWith(project.id);
   });
 
-  it('openDocumentsModal debe abrir el modal y llamar a getProjectDocuments', () => {
+  it('openDocumentsModal debe abrir UohModal de documentos y llamar a getProjectDocuments', () => {
     const project = mockProjects[0];
+    const openSpy = vi.spyOn(component.documentsModal()!, 'open');
+
     component.openDocumentsModal(project);
 
+    expect(openSpy).toHaveBeenCalled();
     expect(component.activeModal()).toBe('documents');
     expect(component.selectedProject()).toBe(project);
     expect(sgiApiServiceSpy.getProjectDocuments).toHaveBeenCalledWith(project.id);
   });
 
-  it('closeModal debe resetear el estado del modal', () => {
+  it('closeModal debe cerrar el UohModal activo y resetear el estado del modal', () => {
+    const closeSpy = vi.spyOn(component.historyModal()!, 'close');
+
     component.openHistoryModal(mockProjects[0]);
     component.closeModal();
 
+    expect(closeSpy).toHaveBeenCalled();
     expect(component.activeModal()).toBeNull();
     expect(component.selectedProject()).toBeNull();
     expect(component.historyItems()).toEqual([]);
+  });
+
+  it('onModalHidden debe sincronizar activeModal cuando Bootstrap cierra el modal (ESC o backdrop) y permitir reabrir', () => {
+    const project = mockProjects[0];
+    const openSpy = vi.spyOn(component.documentsModal()!, 'open');
+
+    component.openDocumentsModal(project);
+    expect(component.activeModal()).toBe('documents');
+
+    component.onModalHidden('documents');
+    expect(component.activeModal()).toBeNull();
+    expect(component.selectedProject()).toBeNull();
+
+    component.openDocumentsModal(project);
+    expect(openSpy).toHaveBeenCalledTimes(2);
+    expect(component.activeModal()).toBe('documents');
   });
 
   it('getTextColor debe calcular contraste oscuro para colores claros y claro para oscuros', () => {

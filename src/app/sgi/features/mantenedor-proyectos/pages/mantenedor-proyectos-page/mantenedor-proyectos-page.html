@@ -243,185 +243,189 @@
   </div>
 
   <!-- Modal 1: Historial de Transiciones -->
-  @if (activeModal() === 'history') {
-    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
-      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
-        <div class="modal-content border-0 shadow">
-          <div class="modal-header border-bottom">
-            <h5 class="modal-title">
-              <i class="fa-solid fa-clock-rotate-left me-2 text-primary"></i>
-              Historial de transiciones — {{ selectedProject()?.name }}
-            </h5>
-            <button type="button" class="btn-close" (click)="closeModal()" aria-label="Close"></button>
-          </div>
-          <div class="modal-body p-4">
-            @if (modalLoading()) {
-              <div class="text-center py-4">
-                <div class="spinner-border text-warning" role="status"></div>
-                <p class="text-muted mt-2 mb-0">Cargando historial...</p>
-              </div>
-            } @else if (modalError()) {
-              <div class="alert alert-danger mb-0">{{ modalError() }}</div>
-            } @else if (historyItems().length === 0) {
-              <div class="text-center text-muted py-4">
-                <i class="fa-solid fa-clock-rotate-left fa-2x mb-2 d-block"></i>
-                No se registran transiciones para este proyecto.
-              </div>
-            } @else {
-              <div class="timeline">
-                @for (item of historyItems(); track item.id) {
-                  <div class="timeline-card p-3 mb-3 border rounded bg-light">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                      <span class="badge bg-primary text-uppercase font-monospace small">
-                        {{ item.action }}
-                      </span>
-                      <small class="text-muted">
-                        {{ item.created_at ? (item.created_at | date:'dd/MM/yyyy HH:mm') : '—' }}
-                      </small>
-                    </div>
-
-                    <div class="small text-muted mb-2">
-                      <i class="fa-solid fa-user me-1"></i>
-                      <strong>{{ item.user_name || ('Usuario #' + item.user_id) }}</strong>
-                    </div>
-
-                    @if (item.from_phase_name || item.to_phase_name) {
-                      <div class="small text-secondary mb-2">
-                        <span class="badge bg-secondary-subtle text-secondary border">{{ item.from_phase_name || 'Inicio' }}</span>
-                        <i class="fa-solid fa-arrow-right mx-2 text-muted"></i>
-                        <span class="badge bg-secondary-subtle text-secondary border">{{ item.to_phase_name || 'Fin' }}</span>
-                      </div>
-                    } @else if (item.phase_name) {
-                      <div class="small text-secondary mb-2">
-                        Fase asociada: <span class="badge bg-secondary-subtle text-secondary border">{{ item.phase_name }}</span>
-                      </div>
-                    }
-
-                    @if (item.comment) {
-                      <div class="small bg-white p-2 rounded border border-light-subtle fst-italic text-dark">
-                        "{{ item.comment }}"
-                      </div>
-                    }
-                  </div>
-                }
-              </div>
-            }
-          </div>
-          <div class="modal-footer border-top">
-            <button type="button" class="btn btn-secondary" (click)="closeModal()">Cerrar</button>
-          </div>
-        </div>
-      </div>
+  <uoh-modal
+    #historyModal
+    modalId="sgi-project-history-modal"
+    ariaLabelledBy="sgi-project-history-modal-title"
+    size="lg"
+    [centered]="true"
+    [scrollable]="true"
+    (hidden)="onModalHidden('history')"
+  >
+    <div class="modal-header border-bottom">
+      <h5 class="modal-title" id="sgi-project-history-modal-title">
+        <i class="fa-solid fa-clock-rotate-left me-2 text-primary"></i>
+        Historial de transiciones — {{ selectedProject()?.name }}
+      </h5>
+      <button type="button" class="btn-close" (click)="closeModal()" aria-label="Close"></button>
     </div>
-  }
+    <div class="modal-body p-4">
+      @if (modalLoading()) {
+        <div class="text-center py-4">
+          <div class="spinner-border text-warning" role="status"></div>
+          <p class="text-muted mt-2 mb-0">Cargando historial...</p>
+        </div>
+      } @else if (modalError()) {
+        <div class="alert alert-danger mb-0">{{ modalError() }}</div>
+      } @else if (historyItems().length === 0) {
+        <div class="text-center text-muted py-4">
+          <i class="fa-solid fa-clock-rotate-left fa-2x mb-2 d-block"></i>
+          No se registran transiciones para este proyecto.
+        </div>
+      } @else {
+        <div class="timeline">
+          @for (item of historyItems(); track item.id) {
+            <div class="timeline-card p-3 mb-3 border rounded bg-light">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="badge bg-primary text-uppercase font-monospace small">
+                  {{ item.action }}
+                </span>
+                <small class="text-muted">
+                  {{ item.created_at ? (item.created_at | date:'dd/MM/yyyy HH:mm') : '—' }}
+                </small>
+              </div>
+
+              <div class="small text-muted mb-2">
+                <i class="fa-solid fa-user me-1"></i>
+                <strong>{{ item.user_name || ('Usuario #' + item.user_id) }}</strong>
+              </div>
+
+              @if (item.from_phase_name || item.to_phase_name) {
+                <div class="small text-secondary mb-2">
+                  <span class="badge bg-secondary-subtle text-secondary border">{{ item.from_phase_name || 'Inicio' }}</span>
+                  <i class="fa-solid fa-arrow-right mx-2 text-muted"></i>
+                  <span class="badge bg-secondary-subtle text-secondary border">{{ item.to_phase_name || 'Fin' }}</span>
+                </div>
+              } @else if (item.phase_name) {
+                <div class="small text-secondary mb-2">
+                  Fase asociada: <span class="badge bg-secondary-subtle text-secondary border">{{ item.phase_name }}</span>
+                </div>
+              }
+
+              @if (item.comment) {
+                <div class="small bg-white p-2 rounded border border-light-subtle fst-italic text-dark">
+                  "{{ item.comment }}"
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+    <div class="modal-footer border-top">
+      <button type="button" class="btn btn-secondary" (click)="closeModal()">Cerrar</button>
+    </div>
+  </uoh-modal>
 
   <!-- Modal 2: Repositorio de Documentos por Fase -->
-  @if (activeModal() === 'documents') {
-    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
-      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
-        <div class="modal-content border-0 shadow">
-          <div class="modal-header border-bottom">
-            <h5 class="modal-title">
-              <i class="fa-solid fa-folder-open me-2 text-warning"></i>
-              Documentos por fase — {{ selectedProject()?.name }}
-            </h5>
-            <button type="button" class="btn-close" (click)="closeModal()" aria-label="Close"></button>
-          </div>
-          <div class="modal-body p-4">
-            @if (modalLoading()) {
-              <div class="text-center py-4">
-                <div class="spinner-border text-warning" role="status"></div>
-                <p class="text-muted mt-2 mb-0">Cargando repositorio de documentos...</p>
+  <uoh-modal
+    #documentsModal
+    modalId="sgi-project-documents-modal"
+    ariaLabelledBy="sgi-project-documents-modal-title"
+    size="xl"
+    [centered]="true"
+    [scrollable]="true"
+    (hidden)="onModalHidden('documents')"
+  >
+    <div class="modal-header border-bottom">
+      <h5 class="modal-title" id="sgi-project-documents-modal-title">
+        <i class="fa-solid fa-folder-open me-2 text-warning"></i>
+        Documentos por fase — {{ selectedProject()?.name }}
+      </h5>
+      <button type="button" class="btn-close" (click)="closeModal()" aria-label="Close"></button>
+    </div>
+    <div class="modal-body p-4">
+      @if (modalLoading()) {
+        <div class="text-center py-4">
+          <div class="spinner-border text-warning" role="status"></div>
+          <p class="text-muted mt-2 mb-0">Cargando repositorio de documentos...</p>
+        </div>
+      } @else if (modalError()) {
+        <div class="alert alert-danger mb-0">{{ modalError() }}</div>
+      } @else if (documentGroups().length === 0) {
+        <div class="text-center text-muted py-4">
+          <i class="fa-solid fa-folder-open fa-2x mb-2 d-block"></i>
+          No hay fases ni documentos asociados a este proyecto.
+        </div>
+      } @else {
+        <div class="d-flex flex-column gap-3">
+          @for (group of documentGroups(); track group.phase_id) {
+            <div class="card border shadow-sm">
+              <div class="card-header bg-light d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div>
+                  <span class="badge bg-primary me-2">{{ group.stage_name || 'Etapa' }}</span>
+                  <strong>{{ group.phase_name }}</strong>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                  @if (group.closed_at) {
+                    <span class="badge bg-success-subtle text-success border border-success">
+                      Cerrada: {{ group.closed_at | date:'dd/MM/yyyy' }}
+                    </span>
+                  } @else {
+                    <span class="badge bg-warning-subtle text-warning border border-warning">
+                      Fase abierta
+                    </span>
+                  }
+                  <span class="badge bg-secondary">{{ group.files.length }} archivo(s)</span>
+                </div>
               </div>
-            } @else if (modalError()) {
-              <div class="alert alert-danger mb-0">{{ modalError() }}</div>
-            } @else if (documentGroups().length === 0) {
-              <div class="text-center text-muted py-4">
-                <i class="fa-solid fa-folder-open fa-2x mb-2 d-block"></i>
-                No hay fases ni documentos asociados a este proyecto.
-              </div>
-            } @else {
-              <div class="d-flex flex-column gap-3">
-                @for (group of documentGroups(); track group.phase_id) {
-                  <div class="card border shadow-sm">
-                    <div class="card-header bg-light d-flex flex-wrap justify-content-between align-items-center gap-2">
-                      <div>
-                        <span class="badge bg-primary me-2">{{ group.stage_name || 'Etapa' }}</span>
-                        <strong>{{ group.phase_name }}</strong>
-                      </div>
-                      <div class="d-flex align-items-center gap-2">
-                        @if (group.closed_at) {
-                          <span class="badge bg-success-subtle text-success border border-success">
-                            Cerrada: {{ group.closed_at | date:'dd/MM/yyyy' }}
-                          </span>
-                        } @else {
-                          <span class="badge bg-warning-subtle text-warning border border-warning">
-                            Fase abierta
-                          </span>
-                        }
-                        <span class="badge bg-secondary">{{ group.files.length }} archivo(s)</span>
-                      </div>
-                    </div>
-                    <div class="card-body p-3">
-                      @if (group.files.length === 0) {
-                        <p class="text-muted small mb-0 fst-italic">Sin documentos subidos en esta fase.</p>
-                      } @else {
-                        <div class="table-responsive">
-                          <table class="table table-sm table-hover align-middle mb-0">
-                            <thead class="table-light small text-muted">
-                              <tr>
-                                <th>Archivo</th>
-                                <th>Asociado a</th>
-                                <th>Subido por</th>
-                                <th>Fecha</th>
-                                <th>Tamaño</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              @for (file of group.files; track file.id) {
-                                <tr>
-                                  <td>
-                                    <i class="fa-solid fa-file-lines me-2 text-primary"></i>
-                                    <strong>{{ file.name }}</strong>
-                                    @if (file.was_uploaded_after_close) {
-                                      <span class="badge bg-info-subtle text-info ms-2" title="Subido después del cierre de fase">
-                                        Post-cierre
-                                      </span>
-                                    }
-                                  </td>
-                                  <td>
-                                    @if (file.requirement_name) {
-                                      <span class="badge bg-light text-dark border">
-                                        Requisito: {{ file.requirement_name }}
-                                      </span>
-                                    } @else if (file.milestone_name) {
-                                      <span class="badge bg-light text-dark border">
-                                        Hito: {{ file.milestone_name }}
-                                      </span>
-                                    } @else {
-                                      <span class="text-muted">—</span>
-                                    }
-                                  </td>
-                                  <td><small class="text-muted">{{ file.uploaded_by || '—' }}</small></td>
-                                  <td><small class="text-muted">{{ file.created_at ? (file.created_at | date:'dd/MM/yyyy') : '—' }}</small></td>
-                                  <td><small class="text-muted font-monospace">{{ formatFileSize(file.file_size) }}</small></td>
-                                </tr>
+              <div class="card-body p-3">
+                @if (group.files.length === 0) {
+                  <p class="text-muted small mb-0 fst-italic">Sin documentos subidos en esta fase.</p>
+                } @else {
+                  <div class="table-responsive">
+                    <table class="table table-sm table-hover align-middle mb-0">
+                      <thead class="table-light small text-muted">
+                        <tr>
+                          <th>Archivo</th>
+                          <th>Asociado a</th>
+                          <th>Subido por</th>
+                          <th>Fecha</th>
+                          <th>Tamaño</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (file of group.files; track file.id) {
+                          <tr>
+                            <td>
+                              <i class="fa-solid fa-file-lines me-2 text-primary"></i>
+                              <strong>{{ file.name }}</strong>
+                              @if (file.was_uploaded_after_close) {
+                                <span class="badge bg-info-subtle text-info ms-2" title="Subido después del cierre de fase">
+                                  Post-cierre
+                                </span>
                               }
-                            </tbody>
-                          </table>
-                        </div>
-                      }
-                    </div>
+                            </td>
+                            <td>
+                              @if (file.requirement_name) {
+                                <span class="badge bg-light text-dark border">
+                                  Requisito: {{ file.requirement_name }}
+                                </span>
+                              } @else if (file.milestone_name) {
+                                <span class="badge bg-light text-dark border">
+                                  Hito: {{ file.milestone_name }}
+                                </span>
+                              } @else {
+                                <span class="text-muted">—</span>
+                              }
+                            </td>
+                            <td><small class="text-muted">{{ file.uploaded_by || '—' }}</small></td>
+                            <td><small class="text-muted">{{ file.created_at ? (file.created_at | date:'dd/MM/yyyy') : '—' }}</small></td>
+                            <td><small class="text-muted font-monospace">{{ formatFileSize(file.file_size) }}</small></td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
                   </div>
                 }
               </div>
-            }
-          </div>
-          <div class="modal-footer border-top">
-            <button type="button" class="btn btn-secondary" (click)="closeModal()">Cerrar</button>
-          </div>
+            </div>
+          }
         </div>
-      </div>
+      }
     </div>
-  }
+    <div class="modal-footer border-top">
+      <button type="button" class="btn btn-secondary" (click)="closeModal()">Cerrar</button>
+    </div>
+  </uoh-modal>
 </section>
