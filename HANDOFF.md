@@ -1,16 +1,17 @@
 # HANDOFF — estado actual
-Actualizado: 2026-11-02 por Antigravity · Rama: feature/sgi-modals-uohmodal · Último commit: 17d6118
+Actualizado: 2026-11-02 por Antigravity · Rama: feature/sgi-modals-uohmodal · Último commit: 5a4b5ae
 
 ## Tarea en curso
-Migrar los dos modales de `mantenedor-proyectos-page` (Historial de transiciones y Repositorio de documentos) a `<uoh-modal>` de `uoh-ui`. **Detenido por regla de gobernanza (Paso 4)** al detectar un bug en `UohModal.ngOnDestroy()` cuando coexisten dos `<uoh-modal>` hermanos.
+Actualizar `uoh-ui` desde la rama `release` de `uoh-angular-ui` en SGI, verificar las correcciones del diseñador (`UohModal.ngOnDestroy`, `UohSidebar` y `data-bs-dismiss="offcanvas"`), y ejecutar `npm run build` y `npm test -- --watch=false`.
 
 ## Hecho
-- **Diagnóstico DevTools (Paso 1):** `.modal` (`position: fixed; z-index: 1055`) estaba dentro de `<article class="container-fluid p-4">` (`position: relative; z-index: 1` de `uoh-shared-styles`), quedando atrapado en ese stacking context hijo (`z-index: 1`) por debajo de `.sidebar-desktop.sticky-top` (`position: sticky; z-index: 1020` en `<main>`).
-- **Migración y prueba en navegador (Pasos 2 y 3):** migrados ambos modales a `<uoh-modal>` en `mantenedor-proyectos-page` y verificado en navegador (apertura, cierre por botones/ESC/backdrop, reapertura en múltiples ciclos y z-index `11000` en `document.body` sobre el sidebar).
-- **Hallazgo de gobernanza en `UohModal` (Pasos 4 y 5):** al destruir el componente (`ngOnDestroy`), `UohModal` ejecuta `this.originalParent.insertBefore(hostElement, this.originalNextSibling ?? null)`. Con dos `<uoh-modal>` hermanos, `originalNextSibling` del primero es el segundo `<uoh-modal>` (que sigue en `document.body`), lanzando `DOMException: NotFoundError`.
+- Migrados ambos modales de `mantenedor-proyectos-page` (Historial de transiciones y Repositorio de documentos) a `<uoh-modal>` de `uoh-ui`.
+- Reportado el hallazgo de `UohModal.ngOnDestroy()` al coexistir dos `<uoh-modal>` hermanos.
 
 ## Siguiente paso exacto
-Esperar decisión del usuario sobre corregir `UohModal.ngOnDestroy()` en `uoh-angular-ui` (ej. verificando `this.originalNextSibling?.parentNode === this.originalParent` o usando un comentario ancla/removido directo) antes de finalizar `npm test`, `DECISIONS.md` y `git push`.
+1. Comparar SHA de `refs/heads/release` en `uoh-angular-ui` con `package-lock.json` (`5ce41d13c2d5b3e3eb5b9c2ee8e8cc79900f2d7b`).
+2. Reinstalar `github:uohiggins/uoh-angular-ui#release` (probando primero sin `--legacy-peer-deps` y verificando `@angular/cdk`).
+3. Inspeccionar `node_modules/uoh-ui/fesm2022/uoh-ui.mjs` y correr build + tests.
 
 ## Cuidado con
-- No agregar wrappers DOM locales (`<div>` alrededor de cada `<uoh-modal>`) sin autorización, por la regla de gobernanza de `uoh-ui`.
+- No aplicar workarounds locales si algún test o corrección de `uoh-ui` falla; reportar directamente.
