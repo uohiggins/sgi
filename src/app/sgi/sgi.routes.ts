@@ -20,4 +20,12 @@ export const sgiRoutes: Routes = [
         './features/mantenedor-proyectos/pages/mantenedor-proyectos-page/mantenedor-proyectos-page'
       ).then((m) => m.MantenedorProyectosPage),
   },
+  {
+    path: 'proyecto/:projectId/flujo',
+    title: 'Flujo del proyecto',
+    loadComponent: () =>
+      import('./features/project-workflow/pages/project-workflow-page/project-workflow-page').then(
+        (m) => m.ProjectWorkflowPage,
+      ),
+  },
 ];

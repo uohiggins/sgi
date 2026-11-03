@@ -8,6 +8,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import Swal from 'sweetalert2/dist/sweetalert2.esm.all.js';
 import { UohModal } from 'uoh-ui';
 import { SgiApiService } from '../../../../core/services/sgi-api.service';
@@ -21,7 +22,7 @@ import {
 @Component({
   selector: 'sgi-mantenedor-proyectos-page',
   standalone: true,
-  imports: [DatePipe, UohModal],
+  imports: [DatePipe, RouterLink, UohModal],
   templateUrl: './mantenedor-proyectos-page.html',
   styleUrl: './mantenedor-proyectos-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -116,16 +117,6 @@ export class MantenedorProyectosPage implements OnInit {
       title: 'Próximamente',
       text: `La vista de detalle para el proyecto "${project.name}" se habilitará en la siguiente fase.`,
       confirmButtonText: 'Entendido',
-      confirmButtonColor: '#EAB308',
-    });
-  }
-
-  onAdvanceStep(project: ProjectListItem): void {
-    Swal.fire({
-      icon: 'info',
-      title: 'Flujo de avance',
-      text: `El motor de avance para "${project.name}" se encuentra en construcción (wizard con stepper).`,
-      confirmButtonText: 'Aceptar',
       confirmButtonColor: '#EAB308',
     });
   }

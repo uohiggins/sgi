@@ -154,6 +154,7 @@ export interface Phase {
   name: string;
   sort_order: number;
   layout: PhaseLayout;
+  icon?: string | null;
   closed_at: string | null;
   closed_by: string | UserRef | null;
   is_closed?: boolean;

@@ -1,4 +1,5 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { MantenedorProyectosPage } from './mantenedor-proyectos-page';
 import { SgiApiService } from '../../../../core/services/sgi-api.service';
@@ -6,6 +7,7 @@ import { ProjectListItem, SgiPaginatedResponse } from '../../models/project.inte
 
 describe('MantenedorProyectosPage', () => {
   let component: MantenedorProyectosPage;
+  let fixture: ComponentFixture<MantenedorProyectosPage>;
   let sgiApiServiceSpy: { [K in keyof SgiApiService]?: any };
 
   const mockProjects: ProjectListItem[] = [
@@ -54,13 +56,24 @@ describe('MantenedorProyectosPage', () => {
     TestBed.configureTestingModule({
       imports: [MantenedorProyectosPage],
       providers: [
+        provideRouter([]),
         { provide: SgiApiService, useValue: sgiApiServiceSpy },
       ],
     });
 
-    const fixture = TestBed.createComponent(MantenedorProyectosPage);
+    fixture = TestBed.createComponent(MantenedorProyectosPage);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  });
+
+  it('muestra el enlace al flujo aunque can_advance sea falso', () => {
+    const link = (): HTMLAnchorElement | null =>
+      (fixture.nativeElement as HTMLElement).querySelector('a[href="/proyecto/1/flujo"]');
+    expect(link()).not.toBeNull();
+
+    component.projects.set([{ ...mockProjects[0], actions: { can_advance: false } }]);
+    fixture.detectChanges();
+    expect(link()).not.toBeNull();
   });
 
   it('debe crearse e inicializar la carga de proyectos', () => {

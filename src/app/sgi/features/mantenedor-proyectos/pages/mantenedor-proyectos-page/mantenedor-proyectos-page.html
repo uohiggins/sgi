@@ -165,17 +165,15 @@
                         <i class="fa-solid fa-folder-open"></i>
                       </button>
 
-                      <!-- Avanzar paso (solo si actions.can_advance es true) -->
-                      @if (project.actions?.['can_advance']) {
-                        <button
-                          type="button"
-                          class="btn btn-outline-success"
-                          (click)="onAdvanceStep(project)"
-                          title="Avanzar paso de flujo"
-                        >
-                          <i class="fa-solid fa-forward-step"></i>
-                        </button>
-                      }
+                      <!-- Flujo del proyecto: siempre visible (can_advance es falso con requisitos pendientes). El listado no informa si el proyecto terminó. -->
+                      <a
+                        class="btn btn-outline-success"
+                        [routerLink]="['/proyecto', project.id, 'flujo']"
+                        title="Abrir flujo del proyecto"
+                        aria-label="Abrir flujo del proyecto"
+                      >
+                        <i class="fa-solid fa-forward-step"></i>
+                      </a>
                     </div>
                   </td>
                 </tr>
