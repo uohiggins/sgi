@@ -56,16 +56,17 @@ describe('ProjectWorkflowState', () => {
     expect(state.viewed()?.phase.name).toBe('Borrador');
   });
 
-  it('flechas: no pasan de la fase abierta ni antes de la primera', () => {
+  it('flechas: limitadas a la etapa vista y sin pasar de la fase abierta', () => {
     setup(buildProject());
 
     expect(state.canGoNext()).toBe(false);
     expect(state.canGoPrevious()).toBe(true);
     state.previous();
     expect(state.viewed()?.phase.name).toBe('Borrador');
-    expect(state.canGoPrevious()).toBe(false);
+    expect(state.canGoPrevious()).toBe(false); // no salta a otra etapa
     state.next();
     expect(state.viewed()?.phase.name).toBe('Revisión');
+    expect(state.canGoNext()).toBe(false);
   });
 
   it('checklist: solo requisitos activos, con estado cumplido, cubierto por alternativa, pendiente y opcional', () => {
@@ -81,12 +82,13 @@ describe('ProjectWorkflowState', () => {
     expect(byName['Desactivado']).toBeUndefined();
   });
 
-  it('usa fa-file-lines cuando la fase no trae icon y respeta icon si llega', () => {
+  it('usa fa-file-lines cuando la fase no trae icon (null/ausente) y respeta el icon propio', () => {
     setup(buildProject());
-    const phase = state.flow()[0].phase;
+    const [borrador, revision] = state.flow().map((f) => f.phase);
 
-    expect(state.phaseIcon(phase)).toBe('fa-file-lines');
-    expect(state.phaseIcon({ ...phase, icon: 'fa-hammer' })).toBe('fa-hammer');
+    expect(state.phaseIcon(borrador)).toBe('fa-pen-ruler');
+    expect(state.phaseIcon(revision)).toBe('fa-file-lines');
+    expect(state.phaseIcon({ ...revision, icon: null })).toBe('fa-file-lines');
   });
 
   it('proyecto terminado: todas cerradas, se ve la última y la etapa queda completa', () => {

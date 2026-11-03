@@ -143,6 +143,7 @@ export interface PhaseCurrentSummary {
   name: string;
   sort_order: number;
   layout: PhaseLayout;
+  icon?: string | null;
 }
 
 export interface Phase {
@@ -318,6 +319,7 @@ export interface WorkflowAdvanceResponse {
   closed_phase: {
     id: number;
     name: string;
+    icon?: string | null;
     closed_at: string | null;
   };
   current_phase: PhaseCurrentSummary | null;

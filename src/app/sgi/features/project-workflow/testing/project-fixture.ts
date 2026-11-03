@@ -1,6 +1,6 @@
 import { Project } from '../../mantenedor-proyectos/models/project.interface';
 
-/** Proyecto de prueba con la forma real de GET /sgi/projects/{id}: sin `icon` en las fases. */
+/** Proyecto de prueba con la forma de GET /sgi/projects/{id}: `icon` es string o null (Borrador lo trae; Revisión y Obra no). */
 export function buildProject(overrides: Partial<Project> = {}): Project {
   const req = (id: number, name: string, extra: Record<string, unknown> = {}) => ({
     id,
@@ -73,6 +73,7 @@ export function buildProject(overrides: Partial<Project> = {}): Project {
           {
             id: 11,
             name: 'Borrador',
+            icon: 'fa-pen-ruler',
             sort_order: 1,
             layout: 'standard',
             closed_at: '2026-10-02T10:00:00Z',

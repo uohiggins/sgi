@@ -42,7 +42,11 @@ describe('ProjectWorkflowPage', () => {
     const timeline = fixture.nativeElement.querySelector('uohx-timeline') as HTMLElement;
     expect(timeline.style.getPropertyValue('--uohx-active-color')).toBe('#8a2be2');
     expect(timeline.querySelectorAll('.step-item').length).toBe(2);
-    expect(timeline.querySelector('.step-circle i.fa-file-lines')).not.toBeNull();
+    const icons = Array.from(timeline.querySelectorAll('.step-circle > i:first-child')).map(
+      (i) => (i as HTMLElement).className,
+    );
+    expect(icons[0]).toContain('fa-pen-ruler'); // Borrador: icono propio
+    expect(icons[1]).toContain('fa-file-lines'); // Revisión: fallback
   });
 
   it('al elegir una fase cerrada muestra solo lectura', async () => {

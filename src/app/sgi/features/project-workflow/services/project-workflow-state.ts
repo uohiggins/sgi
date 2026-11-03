@@ -97,10 +97,10 @@ export class ProjectWorkflowState {
 
   readonly isReadOnly = computed(() => !!this.viewed()?.phase.closed_at);
 
-  readonly canGoPrevious = computed(() => this.viewedIndex() > 0);
+  readonly canGoPrevious = computed(() => this.viewedStepIndex() > 0);
   readonly canGoNext = computed(() => {
-    const idx = this.viewedIndex();
-    return idx >= 0 && idx < Math.min(this.openIndex(), this.flow().length - 1);
+    const idx = this.viewedStepIndex();
+    return idx >= 0 && idx < this.furthestStep();
   });
 
   readonly checklist = computed<ChecklistItem[]>(() => {
@@ -151,20 +151,15 @@ export class ProjectWorkflowState {
   }
 
   previous(): void {
-    if (this.canGoPrevious()) this.viewIndex(this.viewedIndex() - 1);
+    if (this.canGoPrevious()) this.viewStep(this.viewedStepIndex() - 1);
   }
 
   next(): void {
-    if (this.canGoNext()) this.viewIndex(this.viewedIndex() + 1);
+    if (this.canGoNext()) this.viewStep(this.viewedStepIndex() + 1);
   }
 
   phaseIcon(phase: Phase): string {
-    return phase.icon || DEFAULT_PHASE_ICON;
-  }
-
-  private viewIndex(index: number): void {
-    const target = this.flow()[index];
-    if (target) this.viewedPhaseId.set(target.phase.id);
+    return phase.icon ?? DEFAULT_PHASE_ICON;
   }
 
   private stateOf(requirement: PhaseRequirement, fulfilledGroups: Set<string>): RequirementState {
