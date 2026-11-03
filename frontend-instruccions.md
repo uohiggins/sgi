@@ -45,9 +45,17 @@ Arbol base vigente:
 
 ### Uso de `uoh-ui`
 
-Prioridad obligatoria: antes de construir cualquier elemento de UI nuevo o modificar uno existente, verificar si `uoh-ui` ya lo resuelve, ya sea mediante un componente o la configuración/variante de uno existente. Si `uoh-ui` no lo tiene, la vía correcta es agregarlo directamente a la librería; existe autorización del diseñador para modificar `uoh-angular-ui` y `uoh-shared-styles`. No construir un workaround local salvo que se documente explícitamente como excepción temporal en `DECISIONS.md`, indicando la razón.
+a) **Verificar primero.** Antes de construir UI, comprobar si `uoh-ui` la cubre (`node_modules/uoh-ui` y la documentación en `C:\repositorios\uoh-angular-ui\docs`; también la wiki `github.com/uohiggins/uoh-angular-ui.wiki.git`). Si la cubre, usarla.
 
-Además del README, la librería cuenta con una wiki en `github.com/uohiggins/uoh-angular-ui.wiki.git`, un repositorio Git separado que se puede clonar aparte. Consultarla antes de asumir que una capacidad no existe en la librería.
+b) **Si no existe o no sirve del todo, NO modificar la librería** (la usan otros proyectos y se publica a mano en la rama `release`). Crear un componente local derivado en `src/app/shared/uoh-derived/`, partiendo del código fuente de `C:\repositorios\uoh-angular-ui\projects\uoh-ui\src\lib\components\`, con selector de prefijo `uohx-` y clase de prefijo `Uohx`. La cabecera del archivo indica el componente base y el commit de `main` del que se derivó.
+
+c) **Solicitud al diseñador.** En el mismo commit, crear `docs/solicitudes-uoh-ui/<componente>.md` con la plantilla (`docs/solicitudes-uoh-ui/_plantilla.md`) y una fila en el índice `docs/solicitudes-uoh-ui/README.md`.
+
+d) **Migración.** Cuando el diseñador incorpore el cambio a `uoh-ui`, evaluar migrar (opcional) y actualizar el estado en el índice.
+
+e) **Bootstrap plano** tematizado por `uoh-shared-styles` cuenta como parte de la librería; no requiere solicitud.
+
+f) **SweetAlert2** queda aprobado como excepción documentada mientras `uoh-ui` no tenga un diálogo de aviso o confirmación.
 
 ### Convenciones de página
 

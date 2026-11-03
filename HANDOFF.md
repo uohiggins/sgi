@@ -1,17 +1,14 @@
 # HANDOFF — estado actual
-Actualizado: 2026-11-02 por Copilot · Rama: feature/sgi-frontend-motor · Último commit: 69d4d1c (previo a este archivo)
-
-Estado: **Sin tarea en curso**.
+Actualizado: 2026-11-03 por Copilot · Rama: feature/sgi-workflow-execution (desde feature/sgi-frontend-motor) · Último commit: ver `git log`
 
 ## Tarea en curso
-Ninguna.
+Motor de ejecución del flujo, ENTREGA 1: `uohx-timeline`, feature `project-workflow` (ruta `proyecto/:projectId/flujo`), checklist de solo lectura y botón "Avanzar paso" del mantenedor. No mergear.
 
 ## Hecho
-- Auditoría de UI (solo lectura) de `src/app/` contra `uoh-ui` y `uoh-shared-styles` entregada al usuario en el chat; no se modificó código.
-- Migración de modales a `<uoh-modal>` y actualización de `uoh-ui` (6b73982) integradas en esta rama y subidas a origin.
+- Regla de componentes derivados `uohx-` formalizada (frontend-instruccions.md, DECISIONS.md, AGENTS.md, docs/solicitudes-uoh-ui/).
 
 ## Siguiente paso exacto
-Esperar instrucciones del usuario sobre qué hallazgos de la auditoría abordar.
+Crear `src/app/shared/uoh-derived/uohx-timeline` desde UohTimeline (inputs `color` y `completedUpTo`).
 
 ## Cuidado con
 - `uoh-ui@0.0.1` aún declara `peerDependencies` para Angular 21 (`^21.2.0`), por lo que reinstalar requiere `--legacy-peer-deps` y verificar que `@angular/cdk` permanezca en `package.json`.
