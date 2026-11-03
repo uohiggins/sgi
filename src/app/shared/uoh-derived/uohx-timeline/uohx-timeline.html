@@ -1,0 +1,41 @@
+<div class="stepper-wrapper">
+    <div class="d-flex flex-wrap flex-md-nowrap align-items-start justify-content-center justify-content-md-between position-relative">
+        @for (step of steps(); track $index; let i = $index) {
+            <div class="step-item text-center"
+                 [class.active]="getStepClass(i) === 'active'"
+                 [class.completed]="getStepClass(i) === 'completed'"
+                 [class.reached]="getStepClass(i) === 'reached'"
+                 [class.blocked]="getStepClass(i) === 'blocked'"
+                 [class.clickable]="isClickable(i)"
+                 [class.not-clickable]="!isClickable(i)"
+                 (click)="goToStep(i)"
+                 style="width: calc(100% / ({{ steps().length }} - 1));">
+
+                <div class="step-circle">
+                    <i class="fa-solid"
+                       [class]="step.icon"></i>
+                    <i class="fa-solid fa-circle-check"
+                       [class.d-block]="getStepClass(i) === 'completed'"
+                       [class.d-none]="getStepClass(i) !== 'completed'"></i>
+                </div>
+
+                <div class="step-label">
+                    {{ step.label }}
+                </div>
+            </div>
+
+            @if (i < steps().length - 1) {
+                <div
+                    class="step-line d-none d-md-block"
+                    [class.line-completed]="getLineClass(i) === 'line-completed'"
+                    [class.line-reached]="getLineClass(i) === 'line-reached'"
+                    style="
+                        width: calc(100% / {{ steps().length }});
+                        left: calc((100% / {{ steps().length }}) * ({{ i + 1 }} - 1));
+                        transform: translateX(50%);
+                    "
+                ></div>
+            }
+        }
+    </div>
+</div>

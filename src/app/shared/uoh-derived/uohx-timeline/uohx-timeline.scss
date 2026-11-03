@@ -1,0 +1,127 @@
+@use 'uoh-shared-styles/scss/local_variables' as *;
+@use 'uoh-shared-styles/scss/custom_mixins' as *;
+@use "sass:color";
+
+:host {
+    display: block;
+}
+
+.stepper-wrapper {
+    position: relative;
+    padding: 0 1.5rem 1.5rem;
+
+    .step-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        z-index: 2;
+
+        @media (max-width: $md){
+            width: initial !important;
+            min-width: 120px;
+            max-width: 120px;
+        }
+
+        &.clickable {
+            cursor: pointer;
+        }
+
+        &.not-clickable {
+            cursor: not-allowed;
+        }
+
+        &.active{
+            .step-circle {
+                background: var(--bs-local-card);
+                border-color: var(--uohx-active-color, var(--bs-principal)) !important;
+                color: var(--uohx-active-color, var(--bs-principal));
+            }
+
+            .step-label {
+                color: var(--uohx-active-color, var(--bs-principal));
+            }
+        }
+
+        &.reached{
+            .step-circle {
+                background: var(--bs-warning);
+                border-color: var(--bs-warning) !important;
+                color: $black;
+            }
+
+            .step-label {
+                color: $black;
+            }
+        }
+
+        &.blocked{
+            .step-circle {
+                background: var(--bs-local-card);
+                border-color: var(--bs-secondary) !important;
+                color: var(--bs-secondary);
+            }
+        }
+
+        &.completed{
+            .step-circle {
+                background: var(--uohx-completed-color, var(--bs-success));
+                border-color: var(--uohx-completed-color, var(--bs-success)) !important;
+                color: var(--bs-fondo);
+            }
+
+            .step-label {
+                color: var(--uohx-completed-color, var(--bs-success));
+            }
+        }
+
+        &:not(.active){
+            @media (max-width: 400px){
+                display: none;
+            }
+        }
+
+        .step-circle {
+            @include icon-circle(4rem, 4rem, var(--bs-local-card), var(--bs-local-card));
+            color: var(--bs-local-text-headings);
+            font-size: 1.2rem;
+            transition: all 0.2s ease;
+            position: relative;
+
+            .fa-circle-check{
+                position: absolute;
+                bottom: 15px;
+                right: 15px;
+                width: 0;
+                height: 0;
+                color: color.scale($success, $lightness: -10%);
+                background-color: $white;
+                border-radius: 100px;
+            }
+        }
+
+        .step-label {
+            margin-top: 0.75rem;
+            font-size: 0.95rem;
+            color: var(--bs-secundario);
+            text-align: center;
+        }
+    }
+
+    .step-line {
+        height: 2px;
+        background-color: var(--bs-secondary);
+        position: absolute;
+        top: 30%;
+        z-index: 0;
+
+        &.line-completed {
+            background: var(--uohx-completed-color, var(--bs-success));
+            z-index: 1;
+        }
+
+        &.line-reached {
+            background: var(--bs-warning);
+            z-index: 1;
+        }
+    }
+}

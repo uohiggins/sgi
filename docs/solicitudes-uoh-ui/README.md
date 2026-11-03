@@ -6,3 +6,4 @@ Regla completa: sección "Uso de la librería uoh-ui" de `frontend-instruccions.
 
 | Componente | Base en uoh-ui | Estado | Archivo local | Actualizado |
 | :--- | :--- | :--- | :--- | :--- |
+| `uohx-timeline` | `UohTimeline` (main `56c0600`) | pendiente | `src/app/shared/uoh-derived/uohx-timeline/` | 2026-11-03 |
