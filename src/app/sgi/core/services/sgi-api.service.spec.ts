@@ -26,6 +26,26 @@ describe('SgiApiService', () => {
     expect(service).toBeTruthy();
   });
 
+  describe('Archivos de fase: descarga', () => {
+    it('downloadFile pide el blob con la respuesta completa y sin inline por defecto', () => {
+      service.downloadFile(5).subscribe((res) => expect(res.body).toBeInstanceOf(Blob));
+
+      const req = httpMock.expectOne(`${baseUrl}/sgi/files/5/download`);
+      expect(req.request.method).toBe('GET');
+      expect(req.request.responseType).toBe('blob');
+      expect(req.request.params.has('inline')).toBe(false);
+      req.flush(new Blob(['x']));
+    });
+
+    it('downloadFile con inline envía ?inline=1', () => {
+      service.downloadFile(5, true).subscribe();
+
+      const req = httpMock.expectOne((r) => r.url === `${baseUrl}/sgi/files/5/download`);
+      expect(req.request.params.get('inline')).toBe('1');
+      req.flush(new Blob(['x']));
+    });
+  });
+
   describe('1. Sistema', () => {
     it('getHealth debe llamar a GET /sgi/health', () => {
       const mockResponse = {

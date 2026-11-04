@@ -3,6 +3,7 @@ import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { MantenedorProyectosPage } from './mantenedor-proyectos-page';
 import { SgiApiService } from '../../../../core/services/sgi-api.service';
+import { PhaseFileAccess } from '../../../../core/services/phase-file-access';
 import { ProjectListItem, SgiPaginatedResponse } from '../../models/project.interface';
 
 describe('MantenedorProyectosPage', () => {
@@ -64,6 +65,39 @@ describe('MantenedorProyectosPage', () => {
     fixture = TestBed.createComponent(MantenedorProyectosPage);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  });
+
+  it('el modal de documentos ofrece Ver/Descargar y muestra el error del acceso al archivo', async () => {
+    sgiApiServiceSpy['getProjectDocuments'].mockReturnValue(
+      of({
+        success: true,
+        data: [
+          {
+            phase_id: 1,
+            phase_name: 'Borrador',
+            stage_name: 'Diseño',
+            closed_at: null,
+            files: [
+              { id: 1, name: 'plano.pdf', mime_type: 'application/pdf' },
+              { id: 2, name: 'logo.svg', mime_type: 'image/svg+xml' },
+            ],
+          },
+        ],
+      }),
+    );
+    component.openDocumentsModal(mockProjects[0]);
+    fixture.detectChanges();
+    const root = document.body;
+
+    expect(root.querySelectorAll('[data-testid="file-view"]').length).toBe(1);
+    expect(root.querySelectorAll('[data-testid="file-download"]').length).toBe(2);
+
+    const access = TestBed.inject(PhaseFileAccess);
+    vi.spyOn(access, 'view').mockResolvedValue('No tiene permiso para acceder a este archivo.');
+    await component.viewFile({ id: 1, name: 'plano.pdf' } as never);
+    fixture.detectChanges();
+
+    expect(root.querySelector('[data-testid="documents-file-error"]')?.textContent).toContain('No tiene permiso');
   });
 
   it('muestra el enlace al flujo aunque can_advance sea falso', () => {

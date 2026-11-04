@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { AuthService } from '../../../../../auth/services/auth-service';
+import { PhaseFileAccess } from '../../../../core/services/phase-file-access';
 import { SgiApiService } from '../../../../core/services/sgi-api.service';
 import { Phase, ProjectPhaseFile } from '../../../mantenedor-proyectos/models/project.interface';
 import { buildProject } from '../../testing/project-fixture';
@@ -107,8 +108,95 @@ describe('ProjectWorkflowPage', () => {
     await render();
 
     expect(fixture.nativeElement.querySelector('[data-testid="flow-upload"]')).toBeNull();
-    expect(fixture.nativeElement.querySelector('[data-testid="req-files-1"] uoh-button')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-testid="req-files-1"] uoh-button[arialabel="Eliminar archivo"]')).toBeNull();
     expect(text('req-files-1')).toContain('archivo-1.pdf');
+  });
+
+  it('el panel distingue cargando, error de carga y vacío', async () => {
+    await render();
+    const state = fixture.componentInstance.state;
+
+    state.filesLoading.set(true);
+    state.filesError.set(null);
+    state['phaseDetail'].set(null);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[data-testid="flow-docs-loading"]')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-testid="flow-docs-empty"]')).toBeNull();
+
+    state.filesLoading.set(false);
+    state.filesError.set('No se pudieron cargar los documentos de la fase.');
+    fixture.detectChanges();
+    expect(text('flow-docs-error')).toBe('No se pudieron cargar los documentos de la fase.');
+    expect(fixture.nativeElement.querySelector('[data-testid="flow-docs-empty"]')).toBeNull();
+
+    state.filesError.set(null);
+    fixture.detectChanges();
+    expect(text('flow-docs-empty')).toBe('Esta fase aún no tiene documentos.');
+  });
+
+  it('un fallo de getPhase muestra el error y no el vacío', async () => {
+    await render();
+    getPhase.mockReturnValue(throwError(() => new Error('boom')));
+
+    fixture.componentInstance.state.loadPhaseDetail();
+    fixture.detectChanges();
+
+    expect(text('flow-docs-error')).toContain('No se pudieron cargar');
+    expect(fixture.nativeElement.querySelector('[data-testid="flow-docs-empty"]')).toBeNull();
+  });
+
+  it('muestra Ver solo en archivos de tipo seguro y Descargar en todos', async () => {
+    await render();
+    getPhase.mockReturnValue(
+      of({
+        success: true,
+        data: {
+          id: 12,
+          files: [file(1), file(2, { name: 'logo.svg', mime_type: 'image/svg+xml' })],
+        } as Phase,
+      }),
+    );
+    fixture.componentInstance.state.loadPhaseDetail();
+    fixture.detectChanges();
+
+    const rows = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('[data-testid="flow-docs"] > li'),
+    );
+    expect(rows[0].querySelector('[data-testid="file-view"]')).not.toBeNull();
+    expect(rows[0].querySelector('[data-testid="file-download"]')).not.toBeNull();
+    expect(rows[1].querySelector('[data-testid="file-view"]')).toBeNull();
+    expect(rows[1].querySelector('[data-testid="file-download"]')).not.toBeNull();
+  });
+
+  it('un 403 o 404 al descargar muestra un mensaje claro', async () => {
+    await render();
+    const access = TestBed.inject(PhaseFileAccess);
+    vi.spyOn(access, 'download').mockResolvedValue('El archivo ya no está disponible.');
+
+    (fixture.nativeElement.querySelector('[data-testid="flow-docs"] [data-testid="file-download"]') as HTMLElement).click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(text('flow-action-error')).toBe('El archivo ya no está disponible.');
+  });
+
+  it('la zona de arrastre está plegada, se despliega con el botón y se pliega tras subir', async () => {
+    await render();
+    expect(fixture.nativeElement.querySelector('uoh-upload-draggable')).toBeNull();
+
+    (fixture.nativeElement.querySelector('[data-testid="flow-upload-toggle"] button, [data-testid="flow-upload-toggle"]') as HTMLElement).click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('uoh-upload-draggable').length).toBe(1);
+
+    uploadPhaseFile.mockReturnValue(of({ success: true, data: file(2) }));
+    const uploader = {
+      currentValue: () => ({ type: 'document' as const, file: new File(['x'], 'a.pdf') }),
+      reset: vi.fn(),
+    };
+    fixture.componentInstance.attach(1, uploader as never);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('uoh-upload-draggable')).toBeNull();
   });
 
   it('adjunta con file y requirement_id, y refresca el estado', async () => {

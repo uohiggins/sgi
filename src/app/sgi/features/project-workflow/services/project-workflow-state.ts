@@ -1,5 +1,6 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { buildUohUploadFormData, UohUploadValue } from 'uoh-ui';
+import { PhaseFileAccess } from '../../../core/services/phase-file-access';
 import { SgiApiService } from '../../../core/services/sgi-api.service';
 import {
   Phase,
@@ -37,6 +38,7 @@ export interface ChecklistItem {
 @Injectable()
 export class ProjectWorkflowState {
   private readonly api = inject(SgiApiService);
+  private readonly fileAccess = inject(PhaseFileAccess);
 
   readonly project = signal<Project | null>(null);
   readonly loading = signal(false);
@@ -159,6 +161,7 @@ export class ProjectWorkflowState {
     return detail && detail.id === this.viewed()?.phase.id ? (detail.files ?? []) : [];
   });
   readonly filesLoading = signal(false);
+  readonly filesError = signal<string | null>(null);
   readonly uploadingRequirementId = signal<number | null>(null);
   readonly deletingFileId = signal<number | null>(null);
   readonly actionError = signal<string | null>(null);
@@ -195,17 +198,31 @@ export class ProjectWorkflowState {
       return;
     }
     this.filesLoading.set(true);
+    this.filesError.set(null);
     this.api.getPhase(phaseId).subscribe({
       next: (response) => {
         if (this.viewed()?.phase.id === phaseId) this.phaseDetail.set(response.data);
         this.filesLoading.set(false);
       },
       error: () => {
-        if (this.viewed()?.phase.id === phaseId) this.phaseDetail.set(null);
+        if (this.viewed()?.phase.id !== phaseId) return;
+        this.phaseDetail.set(null);
         this.filesLoading.set(false);
-        this.actionError.set('No se pudieron cargar los documentos de la fase.');
+        this.filesError.set('No se pudieron cargar los documentos de la fase.');
       },
     });
+  }
+
+  canView(file: ProjectPhaseFile): boolean {
+    return this.fileAccess.canView(file);
+  }
+
+  async viewFile(file: ProjectPhaseFile): Promise<void> {
+    this.actionError.set(await this.fileAccess.view(file));
+  }
+
+  async downloadFile(file: ProjectPhaseFile): Promise<void> {
+    this.actionError.set(await this.fileAccess.download(file));
   }
 
   filesOf(requirementId: number): ProjectPhaseFile[] {

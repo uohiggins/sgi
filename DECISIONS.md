@@ -2,6 +2,18 @@
 
 Este archivo registra las decisiones de arquitectura, estructura de datos, convenciones y alcance tomadas en el proyecto frontend de SGI.
 
+## 2026-11-04 — Entrega 2A.1: ver y descargar archivos del flujo
+**Contexto:** El backend ya expone `GET /api/v2/sgi/files/{file}/download` (leído en `ProjectPhaseFileController@download` y `routes/api/sgi.php`): exige `sgi.projects.view`, sirve `attachment` por defecto y con `?inline=1` solo respeta pdf/png/jpeg/gif/webp (nunca SVG/HTML/XML/JS); 403/404 con el envelope JSON del módulo.
+**Decisión:**
+- `SgiApiService.downloadFile(id, inline)` pide `responseType: 'blob'` con `observe: 'response'` (la app usa Bearer: un enlace directo no puede enviar el token).
+- `PhaseFileAccess` (`core/services`) concentra la lógica: Descargar crea un enlace temporal con el nombre original y revoca la URL; Ver decide por extensión y por el tipo del registro, abre la pestaña de forma síncrona en el clic (sin `noopener` en `window.open`, que devolvería `null`; se asigna `opener = null`), le asigna el blob al terminar y la cierra si falla o si el servidor responde un tipo fuera de la lista. 403 y 404 devuelven mensajes claros. No se usa `file_path`.
+- `sgi-phase-file-actions` (`sgi/ui`, componente propio, no derivado de uoh-ui) pinta Ver/Descargar y se reutiliza en el checklist, el panel "Documentos de la fase" y el modal "Documentos por fase" del mantenedor.
+- El panel distingue cargando, error de carga (`filesError`) y vacío; antes un fallo mostraba "sin documentos".
+- Zona de arrastre plegada por requisito: `UohUploadDraggable` no ofrece modo compacto, así que se oculta/muestra desde la plantilla con un botón "Adjuntar archivo" y se pliega tras subir con éxito. Sin componentes derivados.
+**Alternativas descartadas:** Enlace `<a href>` directo (sin Bearer); abrir el blob sin pestaña previa (bloqueo de popups); inferir el tipo solo por extensión.
+
+---
+
 ## 2026-11-04 — Entrega 2A: selector de etapa y documentos del flujo
 **Contexto:** Selector de etapas y gestión de archivos en `project-workflow`. Contrato del backend confirmado leyendo `ProjectPhaseFileController`, `routes/api/sgi.php` y `PhaseController::show` (solo lectura).
 **Decisión:**

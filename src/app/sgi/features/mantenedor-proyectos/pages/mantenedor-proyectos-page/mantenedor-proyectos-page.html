@@ -346,6 +346,9 @@
           No hay fases ni documentos asociados a este proyecto.
         </div>
       } @else {
+        @if (fileError(); as fileError) {
+          <div class="alert alert-danger py-2" role="alert" data-testid="documents-file-error">{{ fileError }}</div>
+        }
         <div class="d-flex flex-column gap-3">
           @for (group of documentGroups(); track group.phase_id) {
             <div class="card border shadow-sm">
@@ -380,6 +383,7 @@
                           <th>Subido por</th>
                           <th>Fecha</th>
                           <th>Tamaño</th>
+                          <th class="text-end">Acciones</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -410,6 +414,13 @@
                             <td><small class="text-muted">{{ file.uploaded_by || '—' }}</small></td>
                             <td><small class="text-muted">{{ file.created_at ? (file.created_at | date:'dd/MM/yyyy') : '—' }}</small></td>
                             <td><small class="text-muted font-monospace">{{ formatFileSize(file.file_size) }}</small></td>
+                            <td class="text-end">
+                              <sgi-phase-file-actions
+                                [file]="file"
+                                (view)="viewFile($event)"
+                                (download)="downloadFile($event)"
+                              />
+                            </td>
                           </tr>
                         }
                       </tbody>

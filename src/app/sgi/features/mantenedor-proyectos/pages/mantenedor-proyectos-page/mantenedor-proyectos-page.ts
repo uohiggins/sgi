@@ -12,23 +12,27 @@ import { RouterLink } from '@angular/router';
 import Swal from 'sweetalert2/dist/sweetalert2.esm.all.js';
 import { UohModal } from 'uoh-ui';
 import { SgiApiService } from '../../../../core/services/sgi-api.service';
+import { PhaseFileAccess } from '../../../../core/services/phase-file-access';
+import { PhaseFileActions } from '../../../../ui/phase-file-actions/phase-file-actions';
 import {
   ProjectHistoryItem,
   ProjectListItem,
   ProjectPhaseDocumentGroup,
+  ProjectPhaseFile,
   SgiPaginationMeta,
 } from '../../models/project.interface';
 
 @Component({
   selector: 'sgi-mantenedor-proyectos-page',
   standalone: true,
-  imports: [DatePipe, RouterLink, UohModal],
+  imports: [DatePipe, PhaseFileActions, RouterLink, UohModal],
   templateUrl: './mantenedor-proyectos-page.html',
   styleUrl: './mantenedor-proyectos-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MantenedorProyectosPage implements OnInit {
   private readonly sgiApiService = inject(SgiApiService);
+  private readonly fileAccess = inject(PhaseFileAccess);
 
   readonly historyModal = viewChild<UohModal>('historyModal');
   readonly documentsModal = viewChild<UohModal>('documentsModal');
@@ -54,6 +58,7 @@ export class MantenedorProyectosPage implements OnInit {
   readonly selectedProject = signal<ProjectListItem | null>(null);
   readonly modalLoading = signal<boolean>(false);
   readonly modalError = signal<string | null>(null);
+  readonly fileError = signal<string | null>(null);
   readonly historyItems = signal<ProjectHistoryItem[]>([]);
   readonly documentGroups = signal<ProjectPhaseDocumentGroup[]>([]);
 
@@ -148,6 +153,7 @@ export class MantenedorProyectosPage implements OnInit {
     this.modalLoading.set(true);
     this.modalError.set(null);
     this.documentGroups.set([]);
+    this.fileError.set(null);
     this.documentsModal()?.open();
 
     this.sgiApiService.getProjectDocuments(project.id).subscribe({
@@ -163,9 +169,18 @@ export class MantenedorProyectosPage implements OnInit {
     });
   }
 
+  async viewFile(file: ProjectPhaseFile): Promise<void> {
+    this.fileError.set(await this.fileAccess.view(file));
+  }
+
+  async downloadFile(file: ProjectPhaseFile): Promise<void> {
+    this.fileError.set(await this.fileAccess.download(file));
+  }
+
   closeModal(): void {
     const current = this.activeModal();
     this.activeModal.set(null);
+    this.fileError.set(null);
     this.selectedProject.set(null);
     this.historyItems.set([]);
     this.documentGroups.set([]);

@@ -6,6 +6,7 @@ import {
   effect,
   inject,
   input,
+  signal,
   untracked,
 } from '@angular/core';
 import Swal from 'sweetalert2/dist/sweetalert2.esm.all.js';
@@ -16,6 +17,7 @@ import {
   UohxTimelineStep,
 } from '../../../../../shared/uoh-derived/uohx-timeline/uohx-timeline';
 import { ProjectPhaseFile } from '../../../mantenedor-proyectos/models/project.interface';
+import { PhaseFileActions } from '../../../../ui/phase-file-actions/phase-file-actions';
 import { ProjectWorkflowState } from '../../services/project-workflow-state';
 
 export const FILES_MANAGE_PERMISSION = 'sgi.phases.files.manage';
@@ -24,7 +26,7 @@ export const MAX_FILE_SIZE_MB = 20;
 @Component({
   selector: 'sgi-project-workflow-page',
   standalone: true,
-  imports: [DatePipe, UohButton, UohStepper, UohUploadDraggable, UohxTimeline],
+  imports: [DatePipe, PhaseFileActions, UohButton, UohStepper, UohUploadDraggable, UohxTimeline],
   providers: [ProjectWorkflowState],
   templateUrl: './project-workflow-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -61,9 +63,20 @@ export class ProjectWorkflowPage {
       .map((phase) => ({ label: phase.name, icon: this.state.phaseIcon(phase) })),
   );
 
+  /** Requisito con la zona de arrastre desplegada; UohUploadDraggable no tiene modo compacto. */
+  readonly uploadOpenFor = signal<number | null>(null);
+
+  toggleUpload(requirementId: number): void {
+    this.uploadOpenFor.update((open) => (open === requirementId ? null : requirementId));
+  }
+
   attach(requirementId: number, uploader: UohUploadDraggable): void {
     const value = uploader.currentValue();
-    if (value) this.state.upload(requirementId, value, () => uploader.reset());
+    if (!value) return;
+    this.state.upload(requirementId, value, () => {
+      uploader.reset();
+      this.uploadOpenFor.set(null);
+    });
   }
 
   async remove(file: ProjectPhaseFile): Promise<void> {

@@ -113,44 +113,72 @@
                           @for (file of state.filesOf(item.requirement.id); track file.id) {
                             <li class="d-flex justify-content-between align-items-center gap-2 py-1">
                               <span class="text-break"><i class="fa-regular fa-file me-1"></i>{{ file.name }}</span>
-                              @if (canManageFiles()) {
-                                <uoh-button
-                                  action="delete"
-                                  size="sm"
-                                  [iconOnly]="true"
-                                  variant="danger"
-                                  appearance="outline"
-                                  ariaLabel="Eliminar archivo"
-                                  [disabled]="state.deletingFileId() === file.id"
-                                  (click)="remove(file)"
+                              <span class="d-inline-flex gap-1">
+                                <sgi-phase-file-actions
+                                  [file]="file"
+                                  (view)="state.viewFile($event)"
+                                  (download)="state.downloadFile($event)"
                                 />
-                              }
+                                @if (canManageFiles()) {
+                                  <uoh-button
+                                    action="delete"
+                                    size="sm"
+                                    [iconOnly]="true"
+                                    variant="danger"
+                                    appearance="outline"
+                                    ariaLabel="Eliminar archivo"
+                                    [disabled]="state.deletingFileId() === file.id"
+                                    (click)="remove(file)"
+                                  />
+                                }
+                              </span>
                             </li>
                           }
                         </ul>
 
                         @if (canManageFiles()) {
                           <div class="mt-2" data-testid="flow-upload">
-                            <uoh-upload-draggable
-                              #uploader
-                              [allowLink]="false"
-                              accept=""
-                              [maxFileSizeMb]="maxFileSizeMb"
-                              [disabled]="state.uploadingRequirementId() === item.requirement.id"
-                            />
-                            @if (state.isReadOnly()) {
-                              <p class="small text-muted mt-1 mb-0">
-                                La fase está cerrada: el archivo quedará marcado como subido después del cierre.
-                              </p>
+                            @if (uploadOpenFor() !== item.requirement.id) {
+                              <uoh-button
+                                action="add"
+                                size="sm"
+                                variant="secondary"
+                                appearance="outline"
+                                data-testid="flow-upload-toggle"
+                                (click)="toggleUpload(item.requirement.id)"
+                              >Adjuntar archivo</uoh-button>
+                            } @else {
+                              <uoh-upload-draggable
+                                #uploader
+                                [allowLink]="false"
+                                accept=""
+                                [maxFileSizeMb]="maxFileSizeMb"
+                                [disabled]="state.uploadingRequirementId() === item.requirement.id"
+                              />
+                              @if (state.isReadOnly()) {
+                                <p class="small text-muted mt-1 mb-0">
+                                  La fase está cerrada: el archivo quedará marcado como subido después del cierre.
+                                </p>
+                              }
+                              <div class="d-flex gap-2 mt-2">
+                                <uoh-button
+                                  action="save"
+                                  size="sm"
+                                  [loading]="state.uploadingRequirementId() === item.requirement.id"
+                                  [disabled]="!uploader.currentValue() || state.uploadingRequirementId() !== null"
+                                  data-testid="flow-upload-submit"
+                                  (click)="attach(item.requirement.id, uploader)"
+                                >Adjuntar</uoh-button>
+                                <uoh-button
+                                  action="close"
+                                  size="sm"
+                                  variant="secondary"
+                                  appearance="outline"
+                                  [disabled]="state.uploadingRequirementId() !== null"
+                                  (click)="toggleUpload(item.requirement.id)"
+                                >Cancelar</uoh-button>
+                              </div>
                             }
-                            <uoh-button
-                              class="d-inline-block mt-2"
-                              action="add"
-                              size="sm"
-                              [loading]="state.uploadingRequirementId() === item.requirement.id"
-                              [disabled]="!uploader.currentValue() || state.uploadingRequirementId() !== null"
-                              (click)="attach(item.requirement.id, uploader)"
-                            >Adjuntar</uoh-button>
                           </div>
                         }
                       }
@@ -164,17 +192,26 @@
           <div class="col-12 col-lg-5">
             <h2 class="h6 mb-3">Documentos de la fase</h2>
             @if (state.filesLoading() && state.files().length === 0) {
-              <div class="d-flex align-items-center gap-2 text-muted" role="status">
+              <div class="d-flex align-items-center gap-2 text-muted" role="status" data-testid="flow-docs-loading">
                 <div class="spinner-border spinner-border-sm" aria-hidden="true"></div>
                 <span>Cargando documentos...</span>
               </div>
+            } @else if (state.filesError(); as filesError) {
+              <div class="alert alert-danger mb-0" role="alert" data-testid="flow-docs-error">{{ filesError }}</div>
             } @else if (state.files().length === 0) {
               <p class="text-muted mb-0" data-testid="flow-docs-empty">Esta fase aún no tiene documentos.</p>
             } @else {
               <ul class="list-group" data-testid="flow-docs">
                 @for (file of state.files(); track file.id) {
                   <li class="list-group-item">
-                    <div class="fw-semibold text-break">{{ file.name }}</div>
+                    <div class="d-flex justify-content-between align-items-start gap-2">
+                      <div class="fw-semibold text-break">{{ file.name }}</div>
+                      <sgi-phase-file-actions
+                        [file]="file"
+                        (view)="state.viewFile($event)"
+                        (download)="state.downloadFile($event)"
+                      />
+                    </div>
                     <div class="small text-muted">
                       {{ file.requirement_name ?? file.milestone_name ?? 'Sin asociar' }}
                     </div>
