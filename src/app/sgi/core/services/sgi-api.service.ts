@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
@@ -360,6 +360,19 @@ export class SgiApiService {
    */
   deleteFile(fileId: number): Observable<SgiApiResponse<ProjectPhaseFile>> {
     return this.http.delete<SgiApiResponse<ProjectPhaseFile>>(`${this.apiUrl}/sgi/files/${fileId}`);
+  }
+
+  /**
+   * Descarga un archivo de fase como Blob (Bearer: un enlace directo no puede enviar el token).
+   * Con `inline` el backend solo lo sirve en línea para pdf/png/jpeg/gif/webp.
+   * GET /sgi/files/{file}/download[?inline=1]
+   */
+  downloadFile(fileId: number, inline = false): Observable<HttpResponse<Blob>> {
+    return this.http.get(`${this.apiUrl}/sgi/files/${fileId}/download`, {
+      params: inline ? { inline: '1' } : undefined,
+      responseType: 'blob',
+      observe: 'response',
+    });
   }
 
   // ==========================================
