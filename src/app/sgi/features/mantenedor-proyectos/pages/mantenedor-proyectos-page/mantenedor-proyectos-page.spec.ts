@@ -100,6 +100,25 @@ describe('MantenedorProyectosPage', () => {
     expect(root.querySelector('[data-testid="documents-file-error"]')?.textContent).toContain('No tiene permiso');
   });
 
+  it('el historial muestra la acción en español y deja un código desconocido tal cual', () => {
+    sgiApiServiceSpy['getProjectHistory'].mockReturnValue(
+      of({
+        success: true,
+        data: [
+          { id: 1, action: 'FILE_UPLOADED', user_id: 1, created_at: null },
+          { id: 2, action: 'codigo_nuevo', user_id: 1, created_at: null },
+        ],
+      }),
+    );
+    component.openHistoryModal(mockProjects[0]);
+    fixture.detectChanges();
+
+    const labels = Array.from(document.body.querySelectorAll('[data-testid="history-action"]')).map((e) =>
+      e.textContent?.trim(),
+    );
+    expect(labels).toEqual(['Archivo subido', 'codigo_nuevo']);
+  });
+
   it('muestra el enlace al flujo aunque can_advance sea falso', () => {
     const link = (): HTMLAnchorElement | null =>
       (fixture.nativeElement as HTMLElement).querySelector('a[href="/proyecto/1/flujo"]');

@@ -2,6 +2,14 @@
 
 Este archivo registra las decisiones de arquitectura, estructura de datos, convenciones y alcance tomadas en el proyecto frontend de SGI.
 
+## 2026-11-04 — Entrega 2A.2: acciones del historial en español y colores de modales respetando el tema
+**Decisión:**
+- Mapa `TRANSITION_ACTION_LABELS` + `transitionActionLabel()` en `mantenedor-proyectos/models/transition-action-labels.ts` (18 códigos, según todos los `recordTransition` del backend; el código desconocido se muestra tal cual). El backend los guarda en minúsculas; la insignia ya no fuerza mayúsculas/monoespaciado.
+- Modales y página del flujo sin colores fijos (Bootstrap 5.3 con `data-bs-theme`): `bg-light`→`bg-body-tertiary`, `bg-white`→`bg-body`, `text-dark`→`text-body`, `table-light`→`table-active`, `badge bg-light text-dark`/`text-bg-light`→`bg-body-secondary text-body`, y `text-success|warning|info|secondary` sobre fondos `-subtle`→`text-*-emphasis`.
+**Metadata del historial (no se muestra aún):** el payload trae `metadata` (JSON libre): archivos `file_id`, `name`, `was_uploaded_after_close` (subido) / `file_id`, `name` (eliminado); requisitos `requirement_id`, `name`, `type`; hitos `milestone_id`, `name`, `status`; comentarios `comment_id`, `was_created_after_close`; fases/etapas `stage_id`, `name`, `sort_order`, `reordered`; proyectos `from_default`, `source_project_id`, `cloned_from_id`; workflow advance/retreat con su propia metadata.
+
+---
+
 ## 2026-11-04 — Entrega 2A.1: ver y descargar archivos del flujo
 **Contexto:** El backend ya expone `GET /api/v2/sgi/files/{file}/download` (leído en `ProjectPhaseFileController@download` y `routes/api/sgi.php`): exige `sgi.projects.view`, sirve `attachment` por defecto y con `?inline=1` solo respeta pdf/png/jpeg/gif/webp (nunca SVG/HTML/XML/JS); 403/404 con el envelope JSON del módulo.
 **Decisión:**

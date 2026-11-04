@@ -21,6 +21,7 @@ import {
   ProjectPhaseFile,
   SgiPaginationMeta,
 } from '../../models/project.interface';
+import { transitionActionLabel } from '../../models/transition-action-labels';
 
 @Component({
   selector: 'sgi-mantenedor-proyectos-page',
@@ -65,6 +66,8 @@ export class MantenedorProyectosPage implements OnInit {
   // Computed
   readonly isEmpty = computed(() => !this.loading() && this.projects().length === 0);
   readonly totalProjects = computed(() => this.pagination().total);
+
+  readonly actionLabel = transitionActionLabel;
 
   ngOnInit(): void {
     this.loadProjects();

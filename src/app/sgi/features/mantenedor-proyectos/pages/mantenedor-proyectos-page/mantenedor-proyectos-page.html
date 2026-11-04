@@ -91,7 +91,7 @@
                 <tr>
                   <!-- 1. Número -->
                   <td>
-                    <span class="badge bg-light text-dark border font-monospace">
+                    <span class="badge bg-body-secondary text-body border font-monospace">
                       {{ project.internal_code || ('#' + project.id) }}
                     </span>
                     @if (project.is_default) {
@@ -273,10 +273,10 @@
       } @else {
         <div class="timeline">
           @for (item of historyItems(); track item.id) {
-            <div class="timeline-card p-3 mb-3 border rounded bg-light">
+            <div class="timeline-card p-3 mb-3 border rounded bg-body-tertiary">
               <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="badge bg-primary text-uppercase font-monospace small">
-                  {{ item.action }}
+                <span class="badge bg-primary small" data-testid="history-action">
+                  {{ actionLabel(item.action) }}
                 </span>
                 <small class="text-muted">
                   {{ item.created_at ? (item.created_at | date:'dd/MM/yyyy HH:mm') : '—' }}
@@ -290,18 +290,18 @@
 
               @if (item.from_phase_name || item.to_phase_name) {
                 <div class="small text-secondary mb-2">
-                  <span class="badge bg-secondary-subtle text-secondary border">{{ item.from_phase_name || 'Inicio' }}</span>
+                  <span class="badge bg-secondary-subtle text-secondary-emphasis border">{{ item.from_phase_name || 'Inicio' }}</span>
                   <i class="fa-solid fa-arrow-right mx-2 text-muted"></i>
-                  <span class="badge bg-secondary-subtle text-secondary border">{{ item.to_phase_name || 'Fin' }}</span>
+                  <span class="badge bg-secondary-subtle text-secondary-emphasis border">{{ item.to_phase_name || 'Fin' }}</span>
                 </div>
               } @else if (item.phase_name) {
                 <div class="small text-secondary mb-2">
-                  Fase asociada: <span class="badge bg-secondary-subtle text-secondary border">{{ item.phase_name }}</span>
+                  Fase asociada: <span class="badge bg-secondary-subtle text-secondary-emphasis border">{{ item.phase_name }}</span>
                 </div>
               }
 
               @if (item.comment) {
-                <div class="small bg-white p-2 rounded border border-light-subtle fst-italic text-dark">
+                <div class="small bg-body p-2 rounded border fst-italic text-body">
                   "{{ item.comment }}"
                 </div>
               }
@@ -352,18 +352,18 @@
         <div class="d-flex flex-column gap-3">
           @for (group of documentGroups(); track group.phase_id) {
             <div class="card border shadow-sm">
-              <div class="card-header bg-light d-flex flex-wrap justify-content-between align-items-center gap-2">
+              <div class="card-header bg-body-tertiary d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <div>
                   <span class="badge bg-primary me-2">{{ group.stage_name || 'Etapa' }}</span>
                   <strong>{{ group.phase_name }}</strong>
                 </div>
                 <div class="d-flex align-items-center gap-2">
                   @if (group.closed_at) {
-                    <span class="badge bg-success-subtle text-success border border-success">
+                    <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle">
                       Cerrada: {{ group.closed_at | date:'dd/MM/yyyy' }}
                     </span>
                   } @else {
-                    <span class="badge bg-warning-subtle text-warning border border-warning">
+                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
                       Fase abierta
                     </span>
                   }
@@ -376,7 +376,7 @@
                 } @else {
                   <div class="table-responsive">
                     <table class="table table-sm table-hover align-middle mb-0">
-                      <thead class="table-light small text-muted">
+                      <thead class="table-active small text-muted">
                         <tr>
                           <th>Archivo</th>
                           <th>Asociado a</th>
@@ -393,18 +393,18 @@
                               <i class="fa-solid fa-file-lines me-2 text-primary"></i>
                               <strong>{{ file.name }}</strong>
                               @if (file.was_uploaded_after_close) {
-                                <span class="badge bg-info-subtle text-info ms-2" title="Subido después del cierre de fase">
+                                <span class="badge bg-info-subtle text-info-emphasis ms-2" title="Subido después del cierre de fase">
                                   Post-cierre
                                 </span>
                               }
                             </td>
                             <td>
                               @if (file.requirement_name) {
-                                <span class="badge bg-light text-dark border">
+                                <span class="badge bg-body-secondary text-body border">
                                   Requisito: {{ file.requirement_name }}
                                 </span>
                               } @else if (file.milestone_name) {
-                                <span class="badge bg-light text-dark border">
+                                <span class="badge bg-body-secondary text-body border">
                                   Hito: {{ file.milestone_name }}
                                 </span>
                               } @else {

@@ -2,11 +2,12 @@
 Actualizado: 2026-11-04 por Copilot · Rama: feature/sgi-workflow-execution (desde feature/sgi-frontend-motor) · Último commit: ver `git log`
 
 ## Tarea en curso
-Entrega 2A.1 hecha (ver/descargar archivos, estados del panel, zona de arrastre plegable); pendiente de verificación visual del usuario. No mergear. Comentarios y avanzar/retroceder = entrega 2B.
+Entrega 2A.2 hecha (acciones del historial en español, modales sin colores fijos); pendiente de verificación visual en modo claro y oscuro. No mergear. Comentarios y avanzar/retroceder = entrega 2B.
 
 ## Hecho
 - Entregas 1, 1.1 y 2A (stepper, documentos, permiso `sgi.phases.files.manage` vía AuthService).
 - Entrega 2A.1: `SgiApiService.downloadFile` (blob), `PhaseFileAccess`, `sgi-phase-file-actions` en checklist, panel y modal del mantenedor; panel con cargando/error/vacío. 127 tests y build en verde.
+- Entrega 2A.2: `transition-action-labels.ts` (18 códigos) usado en el modal de historial; clases de tema en modales, flujo y tabla del mantenedor. 133 tests y build en verde.
 
 ## Siguiente paso exacto
 Verificación visual de `/proyecto/<id>/flujo` y del modal de documentos (requiere sesión y backend): probar Ver (pdf/imagen), Descargar, 403/404 y pestaña bloqueada. Luego entrega 2B.
