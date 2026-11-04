@@ -5,7 +5,7 @@
       <div class="row g-3 align-items-center mb-4">
         <div class="col-12 col-md-6 col-lg-5">
           <div class="input-group">
-            <span class="input-group-text bg-white border-end-0">
+            <span class="input-group-text bg-body border-end-0">
               <i class="fa-solid fa-magnifying-glass text-muted"></i>
             </span>
             <input
@@ -76,7 +76,7 @@
         <!-- Tabla de proyectos -->
         <div class="table-responsive">
           <table class="table table-hover align-middle mb-0">
-            <thead class="table-light text-uppercase small text-muted">
+            <thead class="text-uppercase small">
               <tr>
                 <th scope="col" style="width: 12%;">Número</th>
                 <th scope="col" style="width: 32%;">Nombre del proyecto</th>
@@ -95,7 +95,7 @@
                       {{ project.internal_code || ('#' + project.id) }}
                     </span>
                     @if (project.is_default) {
-                      <span class="badge bg-info-subtle text-info border border-info ms-1" title="Plantilla base">
+                      <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle ms-1" title="Plantilla base">
                         Plantilla
                       </span>
                     }
@@ -103,7 +103,7 @@
 
                   <!-- 2. Nombre del proyecto -->
                   <td>
-                    <div class="fw-semibold text-dark">{{ project.name }}</div>
+                    <div class="fw-semibold text-body">{{ project.name }}</div>
                     @if (project.description) {
                       <small class="text-muted d-block text-truncate" style="max-width: 340px;">
                         {{ project.description }}

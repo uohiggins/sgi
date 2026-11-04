@@ -2,6 +2,11 @@
 
 Este archivo registra las decisiones de arquitectura, estructura de datos, convenciones y alcance tomadas en el proyecto frontend de SGI.
 
+## 2026-11-04 — Entrega 2A.3: tabla principal del mantenedor respeta el tema
+**Decisión:** `input-group-text bg-white`→`bg-body`; `thead table-light text-muted` → sin ellas (el fondo dorado y el texto blanco de `th` los fija `uoh-shared-styles` con `!important`, por lo que no cambia el aspecto); insignia Plantilla `text-info border-info`→`text-info-emphasis border-info-subtle`; nombre del proyecto `text-dark`→`text-body` (invisible en oscuro). El `.scss` solo tiene una sombra rgba, aceptable.
+
+---
+
 ## 2026-11-04 — Entrega 2A.2: acciones del historial en español y colores de modales respetando el tema
 **Decisión:**
 - Mapa `TRANSITION_ACTION_LABELS` + `transitionActionLabel()` en `mantenedor-proyectos/models/transition-action-labels.ts` (18 códigos, según todos los `recordTransition` del backend; el código desconocido se muestra tal cual). El backend los guarda en minúsculas; la insignia ya no fuerza mayúsculas/monoespaciado.

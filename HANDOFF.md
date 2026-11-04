@@ -2,7 +2,7 @@
 Actualizado: 2026-11-04 por Copilot · Rama: feature/sgi-workflow-execution (desde feature/sgi-frontend-motor) · Último commit: ver `git log`
 
 ## Tarea en curso
-Entrega 2A.2 hecha (acciones del historial en español, modales sin colores fijos); pendiente de verificación visual en modo claro y oscuro. No mergear. Comentarios y avanzar/retroceder = entrega 2B.
+Entrega 2A.3 hecha (tabla principal del mantenedor sin colores fijos); pendiente de verificación visual en modo claro y oscuro. No mergear. Comentarios y avanzar/retroceder = entrega 2B.
 
 ## Hecho
 - Entregas 1, 1.1 y 2A (stepper, documentos, permiso `sgi.phases.files.manage` vía AuthService).
