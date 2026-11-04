@@ -8,17 +8,124 @@ import { ProjectWorkflowState } from './project-workflow-state';
 describe('ProjectWorkflowState', () => {
   let state: ProjectWorkflowState;
   let getProject: ReturnType<typeof vi.fn>;
+  const getPhase = vi.fn();
+  const uploadPhaseFile = vi.fn();
+  const deleteFile = vi.fn();
 
   function setup(project: Project | Error): void {
     getProject = vi.fn().mockReturnValue(
       project instanceof Error ? throwError(() => project) : of({ success: true, data: project }),
     );
     TestBed.configureTestingModule({
-      providers: [ProjectWorkflowState, { provide: SgiApiService, useValue: { getProject } }],
+      providers: [
+        ProjectWorkflowState,
+        { provide: SgiApiService, useValue: { getProject, getPhase, uploadPhaseFile, deleteFile } },
+      ],
     });
     state = TestBed.inject(ProjectWorkflowState);
     state.load(7);
   }
+
+  describe('etapas y documentos', () => {
+    beforeEach(() => {
+      getPhase.mockReset();
+      uploadPhaseFile.mockReset();
+      deleteFile.mockReset();
+    });
+
+    it('stageSteps: una píldora por etapa y deshabilita las futuras sin fases alcanzadas', () => {
+      setup(buildProject());
+
+      expect(state.stageSteps()).toEqual([
+        { id: '1', label: 'Diseño', color: '#8a2be2', disabled: false },
+        { id: '2', label: 'Ejecución', color: '#0d6efd', disabled: true },
+      ]);
+      expect(state.activeStageId()).toBe('1');
+    });
+
+    it('viewStage muestra la abierta si es de la etapa, si no la última cerrada, e ignora las deshabilitadas', () => {
+      const project = buildProject();
+      // Todo cerrado: la fase abierta no pertenece a ninguna etapa.
+      project.stages!.forEach((s) => s.phases!.forEach((p) => (p.closed_at = '2026-10-03T00:00:00Z')));
+      setup(project);
+
+      expect(state.isFinished()).toBe(true);
+      state.viewStage('1');
+      expect(state.viewed()?.phase.name).toBe('Revisión'); // última cerrada de Diseño
+      state.viewStage('2');
+      expect(state.viewed()?.phase.name).toBe('Obra');
+    });
+
+    it('viewStage con una etapa futura no cambia la vista', () => {
+      setup(buildProject());
+
+      state.viewStage('2');
+
+      expect(state.viewed()?.phase.name).toBe('Revisión');
+    });
+
+    it('loadPhaseDetail trae los archivos de la fase vista y filesOf filtra por requisito', () => {
+      getPhase.mockReturnValue(
+        of({
+          success: true,
+          data: {
+            id: 12,
+            files: [
+              { id: 1, requirement_id: 1 },
+              { id: 2, requirement_id: 2 },
+            ],
+          },
+        }),
+      );
+      setup(buildProject());
+
+      state.loadPhaseDetail();
+
+      expect(getPhase).toHaveBeenCalledWith(12);
+      expect(state.files().length).toBe(2);
+      expect(state.filesOf(1).map((f) => f.id)).toEqual([1]);
+    });
+
+    it('descarta archivos de una fase que ya no se está viendo', () => {
+      getPhase.mockReturnValue(of({ success: true, data: { id: 12, files: [{ id: 1, requirement_id: 1 }] } }));
+      setup(buildProject());
+      state.loadPhaseDetail();
+
+      state.viewStep(0);
+
+      expect(state.files()).toEqual([]);
+    });
+
+    it('upload envía file y requirement_id y refresca; un 422 deja el mensaje del backend', () => {
+      getPhase.mockReturnValue(of({ success: true, data: { id: 12, files: [] } }));
+      setup(buildProject());
+      uploadPhaseFile.mockReturnValueOnce(throwError(() => ({ error: { message: 'Archivo demasiado grande' } })));
+      const value = { type: 'document' as const, file: new File(['x'], 'a.pdf') };
+
+      state.upload(1, value);
+      expect(state.actionError()).toBe('Archivo demasiado grande');
+      expect(state.uploadingRequirementId()).toBeNull();
+
+      uploadPhaseFile.mockReturnValueOnce(of({ success: true, data: {} }));
+      const done = vi.fn();
+      state.upload(1, value, done);
+
+      expect(done).toHaveBeenCalled();
+      expect(state.actionError()).toBeNull();
+      expect(getProject).toHaveBeenCalledTimes(2);
+    });
+
+    it('deleteFile llama a la API y refresca', () => {
+      getPhase.mockReturnValue(of({ success: true, data: { id: 12, files: [] } }));
+      setup(buildProject());
+      deleteFile.mockReturnValue(of({ success: true, data: {} }));
+
+      state.deleteFile(5);
+
+      expect(deleteFile).toHaveBeenCalledWith(5);
+      expect(getProject).toHaveBeenCalledTimes(2);
+    });
+  });
 
   it('carga con getProject y ordena etapas y fases', () => {
     setup(buildProject());

@@ -1,13 +1,22 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
+import { buildUohUploadFormData, UohUploadValue } from 'uoh-ui';
 import { SgiApiService } from '../../../core/services/sgi-api.service';
 import {
   Phase,
   PhaseRequirement,
   Project,
+  ProjectPhaseFile,
   Stage,
 } from '../../mantenedor-proyectos/models/project.interface';
 
 export const DEFAULT_PHASE_ICON = 'fa-file-lines';
+
+export interface StageStep {
+  id: string;
+  label: string;
+  color?: string;
+  disabled: boolean;
+}
 
 export interface FlowPhase {
   phase: Phase;
@@ -33,6 +42,8 @@ export class ProjectWorkflowState {
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   private readonly viewedPhaseId = signal<number | null>(null);
+  private readonly phaseDetail = signal<Phase | null>(null);
+  private projectId = 0;
 
   readonly stages = computed<Stage[]>(() =>
     [...(this.project()?.stages ?? [])]
@@ -120,22 +131,146 @@ export class ProjectWorkflowState {
     }));
   });
 
+  /** Una píldora por etapa; las futuras sin ninguna fase abierta ni cerrada quedan deshabilitadas. */
+  readonly stageSteps = computed<StageStep[]>(() => {
+    const open = this.openIndex();
+    let offset = 0;
+    return this.stages().map((stage) => {
+      const count = stage.phases?.length ?? 0;
+      const reachable = count > 0 && offset <= open;
+      offset += count;
+      return {
+        id: String(stage.id),
+        label: stage.name,
+        ...(stage.color ? { color: stage.color } : {}),
+        disabled: !reachable,
+      };
+    });
+  });
+
+  readonly activeStageId = computed(() => {
+    const viewed = this.viewed();
+    return viewed ? String(viewed.stage.id) : '';
+  });
+
+  /** Archivos de la fase vista (GET /sgi/phases/{id}); el detalle del proyecto no los incluye. */
+  readonly files = computed<ProjectPhaseFile[]>(() => {
+    const detail = this.phaseDetail();
+    return detail && detail.id === this.viewed()?.phase.id ? (detail.files ?? []) : [];
+  });
+  readonly filesLoading = signal(false);
+  readonly uploadingRequirementId = signal<number | null>(null);
+  readonly deletingFileId = signal<number | null>(null);
+  readonly actionError = signal<string | null>(null);
+
   load(projectId: number): void {
+    this.projectId = projectId;
     this.loading.set(true);
     this.error.set(null);
     this.viewedPhaseId.set(null);
+    this.fetchProject();
+  }
 
-    this.api.getProject(projectId).subscribe({
+  /** Vuelve a pedir proyecto y archivos de la fase vista sin perder la fase que se está mirando. */
+  refresh(): void {
+    this.fetchProject(false);
+    this.loadPhaseDetail();
+  }
+
+  /** Muestra la fase abierta de la etapa si le pertenece; si no, la última cerrada. */
+  viewStage(stageId: string): void {
+    const stage = this.stages().find((s) => String(s.id) === stageId);
+    const phases = stage?.phases ?? [];
+    const open = this.openPhase();
+    const target =
+      phases.find((p) => p.id === open?.phase.id) ?? [...phases].reverse().find((p) => !!p.closed_at);
+    if (target) this.viewPhase(target.id);
+  }
+
+  /** Carga el detalle (archivos) de la fase vista; descarta respuestas de una fase que ya no se mira. */
+  loadPhaseDetail(): void {
+    const phaseId = this.viewed()?.phase.id;
+    if (phaseId === undefined) {
+      this.phaseDetail.set(null);
+      return;
+    }
+    this.filesLoading.set(true);
+    this.api.getPhase(phaseId).subscribe({
+      next: (response) => {
+        if (this.viewed()?.phase.id === phaseId) this.phaseDetail.set(response.data);
+        this.filesLoading.set(false);
+      },
+      error: () => {
+        if (this.viewed()?.phase.id === phaseId) this.phaseDetail.set(null);
+        this.filesLoading.set(false);
+        this.actionError.set('No se pudieron cargar los documentos de la fase.');
+      },
+    });
+  }
+
+  filesOf(requirementId: number): ProjectPhaseFile[] {
+    return this.files().filter((f) => f.requirement_id === requirementId);
+  }
+
+  upload(requirementId: number, value: UohUploadValue, onDone?: () => void): void {
+    const phaseId = this.viewed()?.phase.id;
+    if (phaseId === undefined || value.type !== 'document') return;
+
+    const body = buildUohUploadFormData(value, { document: 'file' });
+    body.append('requirement_id', String(requirementId));
+    this.actionError.set(null);
+    this.uploadingRequirementId.set(requirementId);
+
+    this.api.uploadPhaseFile(phaseId, body).subscribe({
+      next: () => {
+        this.uploadingRequirementId.set(null);
+        onDone?.();
+        this.refresh();
+      },
+      error: (err) => {
+        this.uploadingRequirementId.set(null);
+        this.actionError.set(this.messageOf(err, 'No se pudo adjuntar el archivo.'));
+      },
+    });
+  }
+
+  deleteFile(fileId: number): void {
+    this.actionError.set(null);
+    this.deletingFileId.set(fileId);
+
+    this.api.deleteFile(fileId).subscribe({
+      next: () => {
+        this.deletingFileId.set(null);
+        this.refresh();
+      },
+      error: (err) => {
+        this.deletingFileId.set(null);
+        this.actionError.set(this.messageOf(err, 'No se pudo eliminar el archivo.'));
+      },
+    });
+  }
+
+  private fetchProject(resetOnError = true): void {
+    this.api.getProject(this.projectId).subscribe({
       next: (response) => {
         this.project.set(response.data);
         this.loading.set(false);
       },
       error: () => {
-        this.project.set(null);
-        this.error.set('No se pudo cargar el proyecto.');
+        if (resetOnError) {
+          this.project.set(null);
+          this.error.set('No se pudo cargar el proyecto.');
+        } else {
+          this.actionError.set('No se pudo actualizar el estado del proyecto.');
+        }
         this.loading.set(false);
       },
     });
+  }
+
+  private messageOf(err: unknown, fallback: string): string {
+    const message = (err as { error?: { message?: unknown } } | null)?.error?.message;
+    return typeof message === 'string' && message ? message : fallback;
   }
 
   /** Muestra la fase de la etapa vista en la posición dada; ignora fases posteriores a la abierta. */

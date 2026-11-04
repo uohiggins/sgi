@@ -2,6 +2,20 @@
 
 Este archivo registra las decisiones de arquitectura, estructura de datos, convenciones y alcance tomadas en el proyecto frontend de SGI.
 
+## 2026-11-04 — Entrega 2A: selector de etapa y documentos del flujo
+**Contexto:** Selector de etapas y gestión de archivos en `project-workflow`. Contrato del backend confirmado leyendo `ProjectPhaseFileController`, `routes/api/sgi.php` y `PhaseController::show` (solo lectura).
+**Decisión:**
+- Selector con `UohStepper` (id = id de etapa, color de la etapa). `disabled` = etapa sin ninguna fase abierta ni cerrada. Al elegirla se ve la fase abierta si es suya o, si no, la última cerrada (`viewStage`).
+- Archivos: el detalle del proyecto no los trae; se piden con `getPhase(id)` (efecto en la página sobre la fase vista; respuestas de otra fase se descartan). Tras subir o eliminar se refrescan proyecto (checklist) y archivos.
+- Subida con `UohUploadDraggable` + `buildUohUploadFormData(value, { document: 'file' })` más `requirement_id`. Backend: `file` máx 20 MB (`[maxFileSizeMb]="20"`), sin restricción de tipo (`accept=""`), exactamente uno de `requirement_id`/`milestone_id`. Solo se adjunta a requisitos `document` (hitos: entrega posterior).
+- Subir y eliminar exigen `sgi.phases.files.manage`. `actions` del proyecto no lo expone y `bootstrap` devuelve `permissions: []`, así que se consulta `AuthService.hasPermission`. Sin permiso se ocultan Adjuntar y Eliminar.
+- El backend permite subir y eliminar en fase cerrada (el archivo queda `was_uploaded_after_close`): no se restringe; se avisa al adjuntar en fase cerrada y el panel marca los posteriores al cierre solo con la fase cerrada.
+- Eliminación con confirmación SweetAlert2 (excepción aprobada).
+**Pendiente/limitación:** el backend NO tiene ruta de descarga ni visualización (`file_path` está en disco `local` privado). Por eso no hay "ver/descargar": se muestra el nombre sin enlace. Hace falta un endpoint (p. ej. `GET /sgi/files/{file}/download`) antes de añadirlo; no se modificó el backend.
+**Alternativas descartadas:** Inventar una URL de descarga a partir de `file_path`; derivar permisos de `can_*` (ninguno corresponde).
+
+---
+
 ## 2026-11-03 — Entrega 1.1: campo `icon` de las fases conectado
 **Contexto:** En la entrega 1 el backend no serializaba `icon`; ahora lo envía (string o null) en `stages[].phases[]`, `current_phase` y las respuestas de advance (`closed_phase` y `current_phase`) y retreat (`reopened_phase` y `current_phase`). Verificado leyendo `ProjectController`, `WorkflowController` y `PhaseController` (sin modificarlos).
 **Decisión:** `icon?: string | null` en `Phase`, `PhaseCurrentSummary` y `WorkflowAdvanceResponse.closed_phase`; el timeline recibe `phase.icon ?? 'fa-file-lines'` (el fallback sigue siendo necesario porque el campo es nullable). Las 11 clases distintas que usa `SgiDemoProjectSeeder` existen en `@fortawesome/fontawesome-free` 7.3.1. Las flechas anterior/siguiente quedan limitadas a las fases de la etapa vista, de modo que el contador "n/N" es coherente; esto reemplaza lo dicho en la entrega 1 sobre cruzar etapas. El salto entre etapas queda fuera de esta entrega (se ve una etapa al elegir una fase por el timeline de la etapa abierta; cambiar de etapa se resuelve después).

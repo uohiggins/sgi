@@ -18,6 +18,14 @@
           </p>
         </header>
 
+        <uoh-stepper
+          class="d-block mb-3"
+          ariaLabel="Etapas del proyecto"
+          [steps]="state.stageSteps()"
+          [activeStep]="state.activeStageId()"
+          (stepSelect)="state.viewStage($event.id)"
+        />
+
         <uohx-timeline
           [steps]="steps()"
           [color]="viewed.stage.color"
@@ -55,47 +63,136 @@
           </div>
         }
 
-        @if (viewed.phase.layout === 'milestones') {
-          <p class="text-muted mb-0" data-testid="flow-milestones">Vista de hitos en construcción</p>
-        } @else {
-          <h2 class="h6 mb-3">Requisitos</h2>
-          @if (state.checklist().length === 0) {
-            <p class="text-muted mb-0">Esta fase no tiene requisitos activos.</p>
-          } @else {
-            <ul class="list-group" data-testid="flow-checklist">
-              @for (item of state.checklist(); track item.requirement.id) {
-                <li class="list-group-item d-flex justify-content-between align-items-center gap-3">
-                  <div>
-                    <i
-                      class="fa-solid me-2"
-                      [class.fa-file-lines]="item.requirement.type === 'document'"
-                      [class.fa-flag]="item.requirement.type === 'milestone'"
-                    ></i>
-                    {{ item.requirement.name }}
-                    @if (item.requirement.group_key) {
-                      <span class="badge text-bg-light ms-2">Alternativa: {{ item.requirement.group_key }}</span>
-                    }
-                  </div>
-                  <span
-                    class="badge"
-                    [class.text-bg-success]="item.state === 'completed'"
-                    [class.text-bg-info]="item.state === 'covered'"
-                    [class.text-bg-warning]="item.state === 'pending'"
-                    [class.text-bg-secondary]="item.state === 'optional'"
-                    [attr.data-state]="item.state"
-                  >
-                    @switch (item.state) {
-                      @case ('completed') { Cumplido }
-                      @case ('covered') { Cubierto por alternativa }
-                      @case ('pending') { Pendiente }
-                      @default { Opcional }
-                    }
-                  </span>
-                </li>
-              }
-            </ul>
-          }
+        @if (state.actionError(); as actionError) {
+          <div class="alert alert-danger py-2" role="alert" data-testid="flow-action-error">{{ actionError }}</div>
         }
+
+        <div class="row g-4">
+          <div class="col-12 col-lg-7">
+            @if (viewed.phase.layout === 'milestones') {
+              <p class="text-muted mb-0" data-testid="flow-milestones">Vista de hitos en construcción</p>
+            } @else {
+              <h2 class="h6 mb-3">Requisitos</h2>
+              @if (state.checklist().length === 0) {
+                <p class="text-muted mb-0">Esta fase no tiene requisitos activos.</p>
+              } @else {
+                <ul class="list-group" data-testid="flow-checklist">
+                  @for (item of state.checklist(); track item.requirement.id) {
+                    <li class="list-group-item">
+                      <div class="d-flex justify-content-between align-items-center gap-3">
+                        <div>
+                          <i
+                            class="fa-solid me-2"
+                            [class.fa-file-lines]="item.requirement.type === 'document'"
+                            [class.fa-flag]="item.requirement.type === 'milestone'"
+                          ></i>
+                          {{ item.requirement.name }}
+                          @if (item.requirement.group_key) {
+                            <span class="badge text-bg-light ms-2">Alternativa: {{ item.requirement.group_key }}</span>
+                          }
+                        </div>
+                        <span
+                          class="badge"
+                          [class.text-bg-success]="item.state === 'completed'"
+                          [class.text-bg-info]="item.state === 'covered'"
+                          [class.text-bg-warning]="item.state === 'pending'"
+                          [class.text-bg-secondary]="item.state === 'optional'"
+                          [attr.data-state]="item.state"
+                        >
+                          @switch (item.state) {
+                            @case ('completed') { Cumplido }
+                            @case ('covered') { Cubierto por alternativa }
+                            @case ('pending') { Pendiente }
+                            @default { Opcional }
+                          }
+                        </span>
+                      </div>
+
+                      @if (item.requirement.type === 'document') {
+                        <ul class="list-unstyled small mt-2 mb-0" [attr.data-testid]="'req-files-' + item.requirement.id">
+                          @for (file of state.filesOf(item.requirement.id); track file.id) {
+                            <li class="d-flex justify-content-between align-items-center gap-2 py-1">
+                              <span class="text-break"><i class="fa-regular fa-file me-1"></i>{{ file.name }}</span>
+                              @if (canManageFiles()) {
+                                <uoh-button
+                                  action="delete"
+                                  size="sm"
+                                  [iconOnly]="true"
+                                  variant="danger"
+                                  appearance="outline"
+                                  ariaLabel="Eliminar archivo"
+                                  [disabled]="state.deletingFileId() === file.id"
+                                  (click)="remove(file)"
+                                />
+                              }
+                            </li>
+                          }
+                        </ul>
+
+                        @if (canManageFiles()) {
+                          <div class="mt-2" data-testid="flow-upload">
+                            <uoh-upload-draggable
+                              #uploader
+                              [allowLink]="false"
+                              accept=""
+                              [maxFileSizeMb]="maxFileSizeMb"
+                              [disabled]="state.uploadingRequirementId() === item.requirement.id"
+                            />
+                            @if (state.isReadOnly()) {
+                              <p class="small text-muted mt-1 mb-0">
+                                La fase está cerrada: el archivo quedará marcado como subido después del cierre.
+                              </p>
+                            }
+                            <uoh-button
+                              class="d-inline-block mt-2"
+                              action="add"
+                              size="sm"
+                              [loading]="state.uploadingRequirementId() === item.requirement.id"
+                              [disabled]="!uploader.currentValue() || state.uploadingRequirementId() !== null"
+                              (click)="attach(item.requirement.id, uploader)"
+                            >Adjuntar</uoh-button>
+                          </div>
+                        }
+                      }
+                    </li>
+                  }
+                </ul>
+              }
+            }
+          </div>
+
+          <div class="col-12 col-lg-5">
+            <h2 class="h6 mb-3">Documentos de la fase</h2>
+            @if (state.filesLoading() && state.files().length === 0) {
+              <div class="d-flex align-items-center gap-2 text-muted" role="status">
+                <div class="spinner-border spinner-border-sm" aria-hidden="true"></div>
+                <span>Cargando documentos...</span>
+              </div>
+            } @else if (state.files().length === 0) {
+              <p class="text-muted mb-0" data-testid="flow-docs-empty">Esta fase aún no tiene documentos.</p>
+            } @else {
+              <ul class="list-group" data-testid="flow-docs">
+                @for (file of state.files(); track file.id) {
+                  <li class="list-group-item">
+                    <div class="fw-semibold text-break">{{ file.name }}</div>
+                    <div class="small text-muted">
+                      {{ file.requirement_name ?? file.milestone_name ?? 'Sin asociar' }}
+                    </div>
+                    <div class="small text-muted">
+                      {{ uploaderName(file) }} · {{ file.created_at | date: 'dd/MM/yyyy HH:mm' }} ·
+                      {{ formatSize(file.file_size) }}
+                    </div>
+                    @if (state.isReadOnly() && file.was_uploaded_after_close) {
+                      <span class="badge text-bg-warning mt-1" data-testid="flow-after-close">
+                        Subido después del cierre
+                      </span>
+                    }
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+        </div>
       } @else {
         <p class="text-muted mb-0">El proyecto no tiene fases configuradas.</p>
       }
